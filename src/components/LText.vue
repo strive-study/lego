@@ -10,8 +10,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
-import { pick } from 'lodash-es'
+import { defineComponent } from 'vue'
 import {
   transformToComponentProps,
   textDefaultProps,
@@ -33,6 +32,7 @@ export default defineComponent({
       props,
       textStylePropName
     )
+
     return {
       styleProps,
       handleClick

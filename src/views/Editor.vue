@@ -2,26 +2,40 @@
   <div class="container">
     <a-layout-content>
       <a-layout>
-        <a-layout-sider width="300" style="background: yellow">
+        <!-- left -->
+        <a-layout-sider width="300" style="background: #fff">
           组件列表
+          <components-list
+            :list="defaultTextTemplates"
+            @on-item-click="handleAddItem"
+          ></components-list>
         </a-layout-sider>
+        <!-- 画布区域 -->
         <a-layout style="padding: 0 24px 24px">
           <a-layout-content class="preview-container">
             <p>画布区域</p>
             <div class="preview-list" id="canvas-area">
-              <component
+              <edit-wrapper
                 v-for="c in components"
                 :key="c.id"
-                v-bind="c.props"
-                :is="c.name"
+                :id="c.id"
+                :is-active="c.id === currentElement?.id"
+                @set-active="handleSetActive"
               >
-                {{ c.props.text }}
-              </component>
+                <component v-bind="c.props" :is="c.name" class="item" />
+              </edit-wrapper>
             </div>
           </a-layout-content>
         </a-layout>
-        <a-layout-sider width="300" style="background: purple">
+        <!-- right -->
+        <a-layout-sider width="300" style="background: #fff">
           组件属性
+          <props-table
+            v-if="currentElement?.props"
+            :props="currentElement.props"
+            @change="handleChange"
+          ></props-table>
+          <pre>{{ currentElement?.props }}</pre>
         </a-layout-sider>
       </a-layout>
     </a-layout-content>
@@ -33,16 +47,44 @@ import { useStore } from 'vuex'
 import { GlobalDataProps } from '@/store'
 import { computed, defineComponent } from 'vue'
 import LText from '@/components/LText.vue'
+import ComponentsList from '@/components/ComponentsList.vue'
+import EditWrapper from '@/components/EditWrapper.vue'
+import { defaultTextTemplates } from '@/defaultTemplates'
+import { ComponentData } from '@/store/editor'
+import PropsTable from '@/components/PropsTable.vue'
 
 export default defineComponent({
   components: {
-    'l-text': LText
+    'l-text': LText,
+    'components-list': ComponentsList,
+    'edit-wrapper': EditWrapper,
+    'props-table': PropsTable
   },
   setup() {
     const store = useStore<GlobalDataProps>()
     const components = computed(() => store.state.editor.components)
+    const currentElement = computed<ComponentData | null>(
+      () => store.getters.getCurrentElement
+    )
+
+    const handleAddItem = (props: any) => {
+      store.commit('addComponent', props)
+    }
+
+    const handleSetActive = (id: string) => {
+      store.commit('setActive', id)
+    }
+
+    const handleChange = (e: any) => {
+      store.commit('updateComponent', e)
+    }
     return {
-      components
+      components,
+      defaultTextTemplates,
+      currentElement,
+      handleAddItem,
+      handleSetActive,
+      handleChange
     }
   }
 })

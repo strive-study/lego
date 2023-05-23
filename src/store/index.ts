@@ -1,9 +1,20 @@
-import { createStore } from "vuex";
+import { createStore } from 'vuex'
+import templates, { TemplatesProps } from './templates'
+import user, { UserProps } from './user'
+import editor, { EditorProps } from './editor'
 
-export default createStore({
-  state: {},
-  getters: {},
-  mutations: {},
-  actions: {},
-  modules: {},
-});
+export interface GlobalDataProps {
+  user: UserProps
+  templates: TemplatesProps
+  editor: EditorProps
+}
+
+const store = createStore({
+  modules: {
+    user,
+    templates,
+    editor
+  }
+})
+
+export default store

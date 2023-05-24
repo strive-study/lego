@@ -16,8 +16,9 @@
             v-for="(option, k) in item.options"
             :key="k"
             :value="option.value"
-            >{{ option.text }}</component
           >
+            <render-vnode :v-node="option.text" />
+          </component>
         </template>
       </component>
     </div>
@@ -25,10 +26,11 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, computed } from 'vue'
+import { PropType, VNode, computed } from 'vue'
 import { propsToFormsMap } from '@/propsMap'
 import { reduce } from 'lodash-es'
 import { TextComponentProps } from '@/defaultProps'
+import RenderVnode from './renderVnode'
 interface FormProps {
   component: string
   subComponent?: string
@@ -39,7 +41,7 @@ interface FormProps {
   }
   text?: string
   options?: {
-    text: string
+    text: string | VNode
     value: any
   }[]
   valueProp: string //ts类型报错 应为可选类型?

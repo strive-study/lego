@@ -38,8 +38,8 @@ export const editorTestComponents: ComponentData[] = [
       text: 'hello3',
       fontSize: '15px',
       actionType: 'url',
-      textAlign: 'right'
-      // url: 'www.baidu.com'
+      textAlign: 'right',
+      url: 'www.baidu.com'
     }
   }
 ]

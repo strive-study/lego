@@ -1,3 +1,7 @@
 module.exports = {
-  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel'
+  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
+  transformIgnorePatterns: [
+    '/!node_modules\\/lodash-es/',
+    '/node_modules\\/axios/'
+  ]
 }

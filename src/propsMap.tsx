@@ -85,5 +85,10 @@ export const propsToFormsMap: PropsToForms = {
     extraProps: {
       style: 'width:100px;'
     }
+  },
+  // TODO More realtion
+  color: {
+    component: 'color-picker',
+    text: '字体颜色'
   }
 }

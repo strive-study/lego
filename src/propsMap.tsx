@@ -1,3 +1,4 @@
+import { VNode, h } from 'vue'
 import { TextComponentProps } from './defaultProps'
 
 export interface PropToForm {
@@ -9,7 +10,7 @@ export interface PropToForm {
   }
   text?: string
   options?: {
-    text: string
+    text: string | VNode
     value: any
   }[]
   initialTransform?: (v: any) => any
@@ -21,7 +22,19 @@ export interface PropToForm {
 export type PropsToForms = {
   [P in keyof TextComponentProps]?: PropToForm
 }
-
+const fontFamilyArr = [
+  { text: '宋体', value: '"SimSun","STSong"' },
+  { text: '黑体', value: '"SimHei","STHeiti"' },
+  { text: '楷体', value: '"KaiTi","STKaiti"' },
+  { text: '仿宋', value: '"FangSong","STFangsong"' }
+]
+const fontFamilyOptions = fontFamilyArr.map(font => {
+  return {
+    value: font.value,
+    // text: h('span', { style: { fontFamily: font.value } }, font.text)
+    text: <span style={{ fontFamily: font.value }}>{font.text}</span>
+  }
+})
 // css属性与组件类型映射Map
 export const propsToFormsMap: PropsToForms = {
   text: {
@@ -68,15 +81,14 @@ export const propsToFormsMap: PropsToForms = {
     component: 'a-select',
     subComponent: 'a-select-option',
     text: '字体',
-    options: [
-      { value: ' ', text: '无' },
-      { text: '宋体', value: '"SimSun","STSong"' },
-      { text: '黑体', value: '"SimHei","STHeiti"' },
-      { text: '楷体', value: '"KaiTi","STKaiti"' },
-      { text: '仿宋', value: '"FangSong","STFangsong"' }
-    ],
+    options: [{ value: ' ', text: '无' }, ...fontFamilyOptions],
     extraProps: {
       style: 'width:100px;'
     }
+  },
+  // TODO More realtion
+  color: {
+    component: 'color-picker',
+    text: '字体颜色'
   }
 }

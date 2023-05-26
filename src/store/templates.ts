@@ -9,7 +9,7 @@ export interface TemplateProps {
   copiedCount: number
 }
 
-const templateTestData: TemplateProps[] = [
+export const templateTestData: TemplateProps[] = [
   {
     id: 1,
     coverImg:

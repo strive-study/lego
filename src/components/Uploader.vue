@@ -1,6 +1,10 @@
 <template>
   <div class="file-upload">
-    <div class="upload-area" @click="triggerUpload">
+    <div
+      class="upload-area"
+      v-on="events"
+      :class="{ 'is-dragover': drag && isDragOver }"
+    >
       <slot v-if="isUploading" name="loading">
         <button disabled>正在上传</button>
       </slot>
@@ -21,12 +25,18 @@
       ref="inputRef"
       @change="handleFileChange"
     />
-    <ul class="upload-list">
+    <ul :class="`upload-list upload-list-${listType}`">
       <li
-        v-for="file in uploadedFiles"
+        v-for="file in filesList"
         :key="file.uid"
         :class="`uploaded-file upload-${file.status}`"
       >
+        <img
+          :src="file.url"
+          :alt="file.name"
+          class="upload-list-thumbnail"
+          v-if="file.url && listType === 'picture'"
+        />
         <span v-if="file.status === 'loading'" class="file-icon"
           ><LoadingOutlined
         /></span>
@@ -41,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref } from 'vue'
+import { PropType, computed, defineComponent, reactive, ref } from 'vue'
 import axios from 'axios'
 import {
   DeleteOutlined,
@@ -50,7 +60,10 @@ import {
 } from '@ant-design/icons-vue'
 import { v4 as uuidv4 } from 'uuid'
 import { last } from 'lodash-es'
+
+type FileListType = 'picture' | 'text'
 type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
+type CheckUpload = (file: File) => boolean | Promise<File>
 export interface UploadFile {
   uid: string
   size: number
@@ -58,12 +71,28 @@ export interface UploadFile {
   status: UploadStatus
   raw: File
   resp?: any
+  url?: string
 }
 export default defineComponent({
   props: {
     action: {
       type: String,
       required: true
+    },
+    beforeUpload: {
+      type: Function as PropType<CheckUpload>
+    },
+    drag: {
+      type: Boolean,
+      default: false
+    },
+    autoUpload: {
+      type: Boolean,
+      default: true
+    },
+    listType: {
+      type: String as PropType<FileListType>,
+      defualt: 'text'
     }
   },
   components: {
@@ -72,16 +101,19 @@ export default defineComponent({
     FileOutlined
   },
   setup(props) {
+    const Authorization =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiIxNTk2NjYzNTAxNSIsInBhc3N3b3JkIjoiM2Q5MjdmMDVkYmQzNzg5YjA5ZDUyMGM1ZDMzZjM0Y2UiLCJwaG9uZU51bWJlciI6IjE1OTY2NjM1MDE1Iiwibmlja05hbWUiOiLkuZDpq5g1MDE1IiwiZ2VuZGVyIjowLCJwaWN0dXJlIjpudWxsLCJjaXR5IjpudWxsLCJsYXRlc3RMb2dpbkF0IjoiMjAyMy0wNS0yNlQxMzowMjoyMS4wMDBaIiwiaXNGcm96ZW4iOmZhbHNlLCJjcmVhdGVkQXQiOiIyMDIwLTA5LTIzVDA1OjU5OjQyLjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDIzLTA1LTI2VDEzOjAyOjIxLjAwMFoiLCJpYXQiOjE2ODUxMDYzODAsImV4cCI6MTY4NTE5Mjc4MH0.il6L3eBu3TRsDtn6MjUfIbPCPVadciRVNMeC3wArnHA'
     const inputRef = ref<null | HTMLInputElement>()
     // 上传过/正在上传 文件列表
-    const uploadedFiles = ref<UploadFile[]>([])
+    const filesList = ref<UploadFile[]>([])
+    const isDragOver = ref(false)
 
     const isUploading = computed(() => {
-      return uploadedFiles.value.some(f => f.status === 'loading')
+      return filesList.value.some(f => f.status === 'loading')
     })
 
     const lastFileData = computed(() => {
-      const lastFile = last(uploadedFiles.value)
+      const lastFile = last(filesList.value)
       if (lastFile) {
         return {
           loaded: lastFile.status === 'success',
@@ -92,7 +124,7 @@ export default defineComponent({
     })
 
     const removeFile = (id: string) => {
-      uploadedFiles.value = uploadedFiles.value.filter(file => file.uid !== id)
+      filesList.value = filesList.value.filter(file => file.uid !== id)
     }
 
     const triggerUpload = () => {
@@ -100,54 +132,139 @@ export default defineComponent({
         inputRef.value.click()
       }
     }
-
-    const Authorization =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiIxNTk2NjYzNTAxNSIsInBhc3N3b3JkIjoiM2Q5MjdmMDVkYmQzNzg5YjA5ZDUyMGM1ZDMzZjM0Y2UiLCJwaG9uZU51bWJlciI6IjE1OTY2NjM1MDE1Iiwibmlja05hbWUiOiLkuZDpq5g1MDE1IiwiZ2VuZGVyIjowLCJwaWN0dXJlIjpudWxsLCJjaXR5IjpudWxsLCJsYXRlc3RMb2dpbkF0IjoiMjAyMy0wNS0yNlQxMzowMjoyMS4wMDBaIiwiaXNGcm96ZW4iOmZhbHNlLCJjcmVhdGVkQXQiOiIyMDIwLTA5LTIzVDA1OjU5OjQyLjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDIzLTA1LTI2VDEzOjAyOjIxLjAwMFoiLCJpYXQiOjE2ODUxMDYzODAsImV4cCI6MTY4NTE5Mjc4MH0.il6L3eBu3TRsDtn6MjUfIbPCPVadciRVNMeC3wArnHA'
+    // v-on
+    let events: { [key: string]: (e: any) => void } = {
+      click: triggerUpload
+    }
+    // @changed
     const handleFileChange = (e: Event) => {
       const target = e.target as HTMLInputElement
-      const files = target.files
-      if (files) {
-        const uploadedFile = files[0]
-        const formData = new FormData()
-        formData.append(uploadedFile.name, uploadedFile)
-        const fileObj = reactive<UploadFile>({
-          uid: uuidv4(),
-          size: uploadedFile.size,
-          name: uploadedFile.name,
-          status: 'loading',
-          raw: uploadedFile
-        })
-        uploadedFiles.value.push(fileObj)
-        axios
-          .post(props.action, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization
-            }
-          })
-          .then(res => {
-            console.log(res.data)
-            fileObj.status = 'success'
-            fileObj.resp = res.data
-          })
-          .catch(() => {
-            fileObj.status = 'error'
-          })
-          .finally(() => {
-            if (inputRef.value) {
-              inputRef.value.value = ''
-            }
-          })
+      beforeUploadCheck(target.files)
+    }
+
+    const handleDrag = (e: DragEvent, over: boolean) => {
+      e.preventDefault()
+      isDragOver.value = over
+    }
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault()
+      isDragOver.value = false
+      if (e.dataTransfer) {
+        beforeUploadCheck(e.dataTransfer.files)
       }
     }
+
+    const addFileToList = (uploadedFile: File) => {
+      const fileObj = reactive<UploadFile>({
+        uid: uuidv4(),
+        size: uploadedFile.size,
+        name: uploadedFile.name,
+        status: 'ready',
+        raw: uploadedFile
+      })
+      if (props.listType === 'picture') {
+        // try {
+        //   fileObj.url = URL.createObjectURL(uploadedFile)
+        // } catch (err) {
+        //   console.error('upload file error', err)
+        // }
+        const fileReader = new FileReader()
+        fileReader.readAsDataURL(uploadedFile)
+        fileReader.addEventListener('load', () => {
+          fileObj.url = fileReader.result as string
+        })
+      }
+      filesList.value.push(fileObj)
+      if (props.autoUpload) {
+        postFile(fileObj)
+      }
+    }
+    // 发送文件
+    const postFile = (readyFile: UploadFile) => {
+      const formData = new FormData()
+      formData.append(readyFile.name, readyFile.raw)
+      readyFile.status = 'loading'
+      axios
+        .post(props.action, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization
+          }
+        })
+        .then(res => {
+          readyFile.status = 'success'
+          readyFile.resp = res.data
+        })
+        .catch(() => {
+          readyFile.status = 'error'
+        })
+        .finally(() => {
+          if (inputRef.value) {
+            inputRef.value.value = ''
+          }
+        })
+    }
+
+    const beforeUploadCheck = (files: null | FileList) => {
+      if (files) {
+        const uploadedFile = files[0]
+        if (props.beforeUpload) {
+          const result = props.beforeUpload(uploadedFile)
+          // promise
+          if (result && result instanceof Promise) {
+            result
+              .then(processedFile => {
+                if (processedFile instanceof File) {
+                  addFileToList(processedFile)
+                } else {
+                  throw new Error(
+                    'beforeUpload Promise should return File object'
+                  )
+                }
+              })
+              .catch(e => {
+                console.error(e)
+              })
+            // true
+          } else if (result === true) {
+            addFileToList(uploadedFile)
+          }
+        } else {
+          addFileToList(uploadedFile)
+        }
+      }
+    }
+
+    if (props.drag) {
+      events = {
+        ...events,
+        dragover: (e: DragEvent) => handleDrag(e, true),
+        dragleave: (e: DragEvent) => handleDrag(e, false),
+        drop: handleDrop
+      }
+    }
+
+    // 手动上传
+    const uploadFiles = () => {
+      filesList.value
+        .filter(file => file.status === 'ready')
+        .forEach(readyFile => {
+          return postFile(readyFile)
+        })
+    }
+
     return {
       inputRef,
       isUploading,
       lastFileData,
-      uploadedFiles,
+      filesList,
+      isDragOver,
+      events,
       removeFile,
-      triggerUpload,
-      handleFileChange
+      handleFileChange,
+      handleDrag,
+      uploadFiles
     }
   }
 })
@@ -170,6 +287,16 @@ export default defineComponent({
   position: relative;
   &:first-child {
     margin-top: 10px;
+  }
+  .upload-list-thumbnail {
+    vertical-align: middle;
+    display: inline-block;
+    width: 70px;
+    height: 70px;
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+    object-fit: cover;
   }
   .file-icon {
     svg {

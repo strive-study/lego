@@ -32,7 +32,6 @@ const props = defineProps({
     required: true
   }
 })
-console.log(props.user)
 const store = useStore()
 const router = useRouter()
 

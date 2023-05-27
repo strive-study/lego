@@ -19,7 +19,8 @@ describe('ColorPicker component', () => {
   beforeAll(() => {
     wrapper = mount(ColorPicker, {
       props: {
-        value: '#ffffff'
+        value: '#ffffff',
+        colors: defaultColors
       }
     })
   })

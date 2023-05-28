@@ -1,5 +1,5 @@
 <template>
-  <Uploader
+  <!-- <Uploader
     action="http://182.92.168.192:8081/api/utils/upload-img"
     drag
     list-type="picture"
@@ -18,7 +18,7 @@
         <h3>点击重新上传</h3>
       </div>
     </template>
-  </Uploader>
+  </Uploader> -->
   <div class="app-container">
     <router-view></router-view>
   </div>
@@ -29,7 +29,7 @@ import Uploader from './components/Uploader.vue'
 </script>
 
 <style lang="scss">
-.file-upload .upload-area {
+/* .file-upload .upload-area {
   width: 360px;
   height: 180px;
   text-align: center;
@@ -49,5 +49,5 @@ import Uploader from './components/Uploader.vue'
 .uploaded-area img {
   height: 100px;
   width: 100px;
-}
+} */
 </style>

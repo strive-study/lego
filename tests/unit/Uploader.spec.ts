@@ -34,7 +34,8 @@ describe('Uploader Component', () => {
       props: {
         action: 'test.url',
         drag: false,
-        autoUpload: true
+        autoUpload: true,
+        showUploadList: true
       },
       global: {
         stubs: mockComponents
@@ -88,7 +89,8 @@ describe('Uploader Component', () => {
       props: {
         action: 'test.url',
         drag: false,
-        autoUpload: true
+        autoUpload: true,
+        showUploadList: true
       },
       slots: {
         default: '<button>Custom button</button>',
@@ -130,7 +132,8 @@ describe('Uploader Component', () => {
         action: 'test.url',
         beforeUpload: checkFileSize,
         drag: false,
-        autoUpload: true
+        autoUpload: true,
+        showUploadList: true
       }
     })
 
@@ -159,7 +162,8 @@ describe('Uploader Component', () => {
         action: 'test.url',
         beforeUpload: failedPromise,
         drag: false,
-        autoUpload: true
+        autoUpload: true,
+        showUploadList: true
       }
     })
     const fileInput = wrapper.get('input').element as HTMLInputElement
@@ -190,7 +194,8 @@ describe('Uploader Component', () => {
       props: {
         action: 'test.url',
         drag: true,
-        autoUpload: true
+        autoUpload: true,
+        showUploadList: true
       }
     })
     const uploadArea = wrapper.get('.upload-area')
@@ -212,7 +217,8 @@ describe('Uploader Component', () => {
       props: {
         action: 'test.url',
         drag: true,
-        autoUpload: false
+        autoUpload: false,
+        showUploadList: true
       }
     })
     const fileInput = wrapper.get('input').element as HTMLInputElement
@@ -239,7 +245,8 @@ describe('Uploader Component', () => {
         action: 'test.url',
         drag: true,
         autoUpload: true,
-        listType: 'picture'
+        listType: 'picture',
+        showUploadList: true
       }
     })
     expect(wrapper.get('ul').classes()).toContain('upload-list-picture')

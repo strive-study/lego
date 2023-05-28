@@ -1,9 +1,9 @@
 import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
-import { TextComponentProps } from '@/defaultProps'
+import { ImageComponentProps, TextComponentProps } from '@/defaultProps'
 export interface ComponentData {
-  props: Partial<TextComponentProps>
+  props: Partial<TextComponentProps & ImageComponentProps>
   id: string
   name: string //组件名称 l-text l-image
 }
@@ -51,13 +51,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     currentElementId: ''
   },
   mutations: {
-    addComponent(state, props: Partial<TextComponentProps>) {
-      const newComponent: ComponentData = {
-        id: uuidv4(),
-        name: 'l-text',
-        props
-      }
-      state.components.push(newComponent)
+    addComponent(state, component: ComponentData) {
+      state.components.push(component)
     },
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId

@@ -25,7 +25,7 @@
       ref="inputRef"
       @change="handleFileChange"
     />
-    <ul :class="`upload-list upload-list-${listType}`">
+    <ul :class="`upload-list upload-list-${listType}`" v-if="showUploadList">
       <li
         v-for="file in filesList"
         :key="file.uid"
@@ -93,6 +93,10 @@ export default defineComponent({
     listType: {
       type: String as PropType<FileListType>,
       defualt: 'text'
+    },
+    showUploadList: {
+      type: Boolean,
+      default: true
     }
   },
   components: {
@@ -100,9 +104,10 @@ export default defineComponent({
     LoadingOutlined,
     FileOutlined
   },
-  setup(props) {
+  emits: ['success', 'error', 'change'],
+  setup(props, { emit }) {
     const Authorization =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiIxNTk2NjYzNTAxNSIsInBhc3N3b3JkIjoiM2Q5MjdmMDVkYmQzNzg5YjA5ZDUyMGM1ZDMzZjM0Y2UiLCJwaG9uZU51bWJlciI6IjE1OTY2NjM1MDE1Iiwibmlja05hbWUiOiLkuZDpq5g1MDE1IiwiZ2VuZGVyIjowLCJwaWN0dXJlIjpudWxsLCJjaXR5IjpudWxsLCJsYXRlc3RMb2dpbkF0IjoiMjAyMy0wNS0yNlQxMzowMjoyMS4wMDBaIiwiaXNGcm96ZW4iOmZhbHNlLCJjcmVhdGVkQXQiOiIyMDIwLTA5LTIzVDA1OjU5OjQyLjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDIzLTA1LTI2VDEzOjAyOjIxLjAwMFoiLCJpYXQiOjE2ODUxMDYzODAsImV4cCI6MTY4NTE5Mjc4MH0.il6L3eBu3TRsDtn6MjUfIbPCPVadciRVNMeC3wArnHA'
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiIxNTk2NjYzNTAxNSIsInBhc3N3b3JkIjoiM2Q5MjdmMDVkYmQzNzg5YjA5ZDUyMGM1ZDMzZjM0Y2UiLCJwaG9uZU51bWJlciI6IjE1OTY2NjM1MDE1Iiwibmlja05hbWUiOiLkuZDpq5g1MDE1IiwiZ2VuZGVyIjowLCJwaWN0dXJlIjpudWxsLCJjaXR5IjpudWxsLCJsYXRlc3RMb2dpbkF0IjoiMjAyMy0wNS0yNlQxMzowNjoyMC4wMDBaIiwiaXNGcm96ZW4iOmZhbHNlLCJjcmVhdGVkQXQiOiIyMDIwLTA5LTIzVDA1OjU5OjQyLjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDIzLTA1LTI2VDEzOjA2OjIwLjAwMFoiLCJpYXQiOjE2ODUxOTg2MDYsImV4cCI6MTY4NTI4NTAwNn0.QY25m1fc-Mn3PbesWNe0QoYGkch-USda91bkGLzqI0c'
     const inputRef = ref<null | HTMLInputElement>()
     // 上传过/正在上传 文件列表
     const filesList = ref<UploadFile[]>([])
@@ -195,9 +200,19 @@ export default defineComponent({
         .then(res => {
           readyFile.status = 'success'
           readyFile.resp = res.data
+          emit('success', {
+            res: res.data,
+            file: readyFile,
+            list: filesList.value
+          })
         })
-        .catch(() => {
+        .catch((e: any) => {
           readyFile.status = 'error'
+          emit('error', {
+            error: e,
+            file: readyFile,
+            list: filesList.value
+          })
         })
         .finally(() => {
           if (inputRef.value) {

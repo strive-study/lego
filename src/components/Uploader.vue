@@ -169,16 +169,16 @@ export default defineComponent({
         raw: uploadedFile
       })
       if (props.listType === 'picture') {
-        // try {
-        //   fileObj.url = URL.createObjectURL(uploadedFile)
-        // } catch (err) {
-        //   console.error('upload file error', err)
-        // }
-        const fileReader = new FileReader()
-        fileReader.readAsDataURL(uploadedFile)
-        fileReader.addEventListener('load', () => {
-          fileObj.url = fileReader.result as string
-        })
+        try {
+          fileObj.url = URL.createObjectURL(uploadedFile)
+        } catch (err) {
+          console.error('upload file error', err)
+        }
+        // const fileReader = new FileReader()
+        // fileReader.readAsDataURL(uploadedFile)
+        // fileReader.addEventListener('load', () => {
+        //   fileObj.url = fileReader.result as string
+        // })
       }
       filesList.value.push(fileObj)
       if (props.autoUpload) {

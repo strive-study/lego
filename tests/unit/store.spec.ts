@@ -52,8 +52,12 @@ describe('test vuex store', () => {
     })
 
     it('add component should works fine', () => {
-      const payload: Partial<TextComponentProps> = {
-        text: 'text1'
+      const payload: ComponentData = {
+        name: 'l-text',
+        id: '1234',
+        props: {
+          text: 'text1'
+        }
       }
       store.commit('addComponent', payload)
       expect(store.state.editor.components).toHaveLength(

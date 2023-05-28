@@ -257,7 +257,7 @@ describe('Uploader Component', () => {
     expect(wrapper.findAll('li').length).toBe(1)
     expect(wrapper.find('li:first-child img').exists()).toBeTruthy()
     const firstImg = wrapper.get('li:first-child img')
-    expect(firstImg.attributes('src')).toEqual('test')
+    expect(firstImg.attributes('src')).toEqual('test.url')
   })
 
   afterEach(() => {

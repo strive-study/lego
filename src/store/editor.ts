@@ -1,9 +1,13 @@
 import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
-import { ImageComponentProps, TextComponentProps } from '@/defaultProps'
+import {
+  AllComponentProps,
+  ImageComponentProps,
+  TextComponentProps
+} from '@/defaultProps'
 export interface ComponentData {
-  props: Partial<TextComponentProps & ImageComponentProps>
+  props: Partial<AllComponentProps & { isEditing: boolean }>
   id: string
   name: string //组件名称 l-text l-image
 }
@@ -26,9 +30,11 @@ export const editorTestComponents: ComponentData[] = [
       text: 'hello2',
       fontSize: '10px',
       fontWeight: 'bold',
+      fontStyle: 'italic',
+      textDecoration: 'underline',
       lineHeight: '2',
       textAlign: 'center',
-      fontFamily: ' ',
+      fontFamily: '',
       color: '#000000'
     }
   },
@@ -40,7 +46,8 @@ export const editorTestComponents: ComponentData[] = [
       fontSize: '15px',
       actionType: 'url',
       textAlign: 'right',
-      url: 'www.baidu.com'
+      url: 'www.baidu.com',
+      isEditing: true
     }
   }
 ]
@@ -54,6 +61,11 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     addComponent(state, component: ComponentData) {
       state.components.push(component)
     },
+    deleteComponent(state, id: string) {
+      state.components = state.components.filter(c => {
+        return c.id !== id
+      })
+    },
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId
     },
@@ -62,7 +74,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         c => c.id === state.currentElementId
       )
       if (shouldUpdateComponent) {
-        shouldUpdateComponent.props[key as keyof TextComponentProps] = value
+        shouldUpdateComponent.props[key as keyof AllComponentProps] = value
       }
     }
   },

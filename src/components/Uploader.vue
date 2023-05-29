@@ -106,8 +106,7 @@ export default defineComponent({
   },
   emits: ['success', 'error', 'change'],
   setup(props, { emit }) {
-    const Authorization =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiIxNTk2NjYzNTAxNSIsInBhc3N3b3JkIjoiM2Q5MjdmMDVkYmQzNzg5YjA5ZDUyMGM1ZDMzZjM0Y2UiLCJwaG9uZU51bWJlciI6IjE1OTY2NjM1MDE1Iiwibmlja05hbWUiOiLkuZDpq5g1MDE1IiwiZ2VuZGVyIjowLCJwaWN0dXJlIjpudWxsLCJjaXR5IjpudWxsLCJsYXRlc3RMb2dpbkF0IjoiMjAyMy0wNS0yNlQxMzowNjoyMC4wMDBaIiwiaXNGcm96ZW4iOmZhbHNlLCJjcmVhdGVkQXQiOiIyMDIwLTA5LTIzVDA1OjU5OjQyLjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDIzLTA1LTI2VDEzOjA2OjIwLjAwMFoiLCJpYXQiOjE2ODUxOTg2MDYsImV4cCI6MTY4NTI4NTAwNn0.QY25m1fc-Mn3PbesWNe0QoYGkch-USda91bkGLzqI0c'
+    const Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiIxNTk2NjYzNTAxNSIsInBhc3N3b3JkIjoiM2Q5MjdmMDVkYmQzNzg5YjA5ZDUyMGM1ZDMzZjM0Y2UiLCJwaG9uZU51bWJlciI6IjE1OTY2NjM1MDE1Iiwibmlja05hbWUiOiLkuZDpq5g1MDE1IiwiZ2VuZGVyIjowLCJwaWN0dXJlIjpudWxsLCJjaXR5IjpudWxsLCJsYXRlc3RMb2dpbkF0IjoiMjAyMy0wNS0yN1QxNDo0MzoyNi4wMDBaIiwiaXNGcm96ZW4iOmZhbHNlLCJjcmVhdGVkQXQiOiIyMDIwLTA5LTIzVDA1OjU5OjQyLjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDIzLTA1LTI3VDE0OjQzOjI2LjAwMFoiLCJpYXQiOjE2ODUzNTYwODcsImV4cCI6MTY4NTQ0MjQ4N30.xk_m-V-RtylCzfwRrpLLPwN87X5Ydxw72Wvo3QdHuEI`
     const inputRef = ref<null | HTMLInputElement>()
     // 上传过/正在上传 文件列表
     const filesList = ref<UploadFile[]>([])
@@ -195,10 +194,15 @@ export default defineComponent({
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization
+          },
+          onUploadProgress: function (progressEvent) {
+            // TODO 处理进度事件
+            // console.log(progressEvent)
           }
         })
         .then(res => {
           readyFile.status = 'success'
+          console.log(res)
           readyFile.resp = res.data
           emit('success', {
             res: res.data,

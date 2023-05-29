@@ -115,6 +115,7 @@ export const textStylePropName = without(
   'text'
 )
 
+// image 组件 影响样式的props属性名
 export const imageStylePropsName = without(
   Object.keys(imageDefaultProps),
   'src'

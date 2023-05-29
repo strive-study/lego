@@ -29,12 +29,13 @@ const props = defineProps({
 })
 const emits = defineEmits(['on-item-click'])
 
-const onItemClick = (data: any) => {
+const onItemClick = (props: any) => {
   const componentData: ComponentData = {
     id: uuidv4(),
     name: 'l-text',
     props
   }
+  componentData.props.isEditing = true
   emits('on-item-click', componentData)
 }
 const onImageUploaded = (res: UploadResp) => {
@@ -50,7 +51,6 @@ const onImageUploaded = (res: UploadResp) => {
   getImageDimention(componentData.props.src).then(({ width }) => {
     const maxWidth = 373
     componentData.props.width = (width > maxWidth ? maxWidth : width) + 'px'
-    console.log(width, componentData.props.width)
     emits('on-item-click', componentData)
   })
 }

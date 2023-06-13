@@ -19,6 +19,7 @@
                 v-for="c in components"
                 :key="c.id"
                 :id="c.id"
+                :hidden="c.isHidden"
                 :is-active="c.id === currentElement?.id"
                 @set-active="handleSetActive"
               >
@@ -29,12 +30,33 @@
         </a-layout>
         <!-- right -->
         <a-layout-sider width="300" style="background: #fff">
-          组件属性
-          <props-table
-            v-if="currentElement?.props"
-            :props="currentElement.props"
-            @change="handleChange"
-          ></props-table>
+          <a-tabs type="card" v-model:activeKey="activePanel">
+            <a-tab-pane key="component" tab="属性设置" class="no-top-radius">
+              <div v-if="currentElement">
+                <props-table
+                  v-if="!currentElement.isLocked"
+                  :props="currentElement.props"
+                  @change="handleChange"
+                ></props-table>
+                <div v-else>
+                  <a-empty>
+                    <template #description>
+                      <p>该元素被锁定，无法编辑</p>
+                    </template>
+                  </a-empty>
+                </div>
+              </div>
+            </a-tab-pane>
+            <a-tab-pane key="layer" tab="图层设置">
+              <layer-list
+                :list="components"
+                :selected-id="currentElement?.id!"
+                @select="handleSetActive"
+                @change="handleChange"
+              >
+              </layer-list>
+            </a-tab-pane>
+          </a-tabs>
           <pre>{{ currentElement?.props }}</pre>
         </a-layout-sider>
       </a-layout>
@@ -45,7 +67,7 @@
 <script lang="ts">
 import { useStore } from 'vuex'
 import { GlobalDataProps } from '@/store'
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
@@ -53,16 +75,18 @@ import { defaultTextTemplates } from '@/defaultTemplates'
 import { ComponentData } from 'strive-lego-bricks'
 import PropsTable from '@/components/PropsTable.vue'
 import LImage from '@/components/LImage.vue'
+import LayerList from '@/components/LayerList.vue'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
-
+export type TabType = 'component' | 'layer' | 'page'
 export default defineComponent({
   components: {
     'l-text': LText,
     'l-image': LImage,
     'components-list': ComponentsList,
     'edit-wrapper': EditWrapper,
-    'props-table': PropsTable
+    'props-table': PropsTable,
+    'layer-list': LayerList
   },
   setup() {
     const store = useStore<GlobalDataProps>()
@@ -70,6 +94,7 @@ export default defineComponent({
     const currentElement = computed<ComponentData | null>(
       () => store.getters.getCurrentElement
     )
+    const activePanel = ref<TabType>('component')
 
     const handleAddItem = (component: any) => {
       store.commit('addComponent', component)
@@ -86,6 +111,7 @@ export default defineComponent({
       components,
       defaultTextTemplates,
       currentElement,
+      activePanel,
       handleAddItem,
       handleSetActive,
       handleChange

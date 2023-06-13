@@ -2,7 +2,7 @@
   <div
     class="edit-wrapper"
     @click="onItemClick(id)"
-    :class="{ active: isActive }"
+    :class="{ active: isActive, hidden: hidden }"
   >
     <slot></slot>
   </div>
@@ -16,6 +16,10 @@ const props = defineProps({
     required: true
   },
   isActive: {
+    type: Boolean,
+    default: false
+  },
+  hidden: {
     type: Boolean,
     default: false
   }
@@ -34,6 +38,9 @@ const onItemClick = (id: string) => {
   user-select: none;
   &:hover {
     border: 1px dashed #ccc;
+  }
+  &.hidden {
+    display: none;
   }
   &.active {
     border: 1px solid #1890ff;

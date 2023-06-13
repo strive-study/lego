@@ -12,7 +12,8 @@ export const editorTestComponents: ComponentData[] = [
   {
     id: uuidv4(),
     name: 'l-text',
-    props: { text: 'hello', fontSize: '20px' }
+    props: { text: 'hello', fontSize: '20px' },
+    layerName: '图层1'
   },
   {
     id: uuidv4(),
@@ -27,7 +28,8 @@ export const editorTestComponents: ComponentData[] = [
       textAlign: 'center',
       fontFamily: '',
       color: '#000000'
-    }
+    },
+    layerName: '图层2'
   },
   {
     id: uuidv4(),
@@ -39,7 +41,8 @@ export const editorTestComponents: ComponentData[] = [
       textAlign: 'right',
       url: 'www.baidu.com',
       isEditing: true
-    }
+    },
+    layerName: '图层3'
   }
 ]
 
@@ -60,12 +63,17 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId
     },
-    updateComponent(state, { key, value }) {
+    updateComponent(state, { key, value, id, isRoot }) {
       const shouldUpdateComponent = state.components.find(
-        c => c.id === state.currentElementId
+        c => c.id === (id || state.currentElementId)
       )
       if (shouldUpdateComponent) {
-        shouldUpdateComponent.props[key as keyof AllComponentProps] = value
+        if (isRoot) {
+          // ts bug issues/31663
+          ;(shouldUpdateComponent as any)[key] = value
+        } else {
+          shouldUpdateComponent.props[key as keyof AllComponentProps] = value
+        }
       }
     }
   },

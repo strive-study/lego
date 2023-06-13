@@ -15,7 +15,7 @@
 import {} from 'vue'
 import LText from './LText.vue'
 import StyledUploader from './StyledUploader.vue'
-import { ComponentData } from '@/store/editor'
+import { ComponentData } from 'strive-lego-bricks'
 import { v4 as uuidv4 } from 'uuid'
 import { message } from 'ant-design-vue'
 import { UploadResp } from '../extraType'

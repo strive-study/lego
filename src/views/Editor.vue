@@ -50,14 +50,16 @@ import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
 import { defaultTextTemplates } from '@/defaultTemplates'
-import { ComponentData } from '@/store/editor'
+import { ComponentData } from 'strive-lego-bricks'
 import PropsTable from '@/components/PropsTable.vue'
+import LImage from '@/components/LImage.vue'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 
 export default defineComponent({
   components: {
     'l-text': LText,
+    'l-image': LImage,
     'components-list': ComponentsList,
     'edit-wrapper': EditWrapper,
     'props-table': PropsTable
@@ -69,8 +71,8 @@ export default defineComponent({
       () => store.getters.getCurrentElement
     )
 
-    const handleAddItem = (props: any) => {
-      store.commit('addComponent', props)
+    const handleAddItem = (component: any) => {
+      store.commit('addComponent', component)
     }
 
     const handleSetActive = (id: string) => {

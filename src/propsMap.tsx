@@ -1,5 +1,5 @@
-import { VNode, h } from 'vue'
-import { TextComponentProps } from './defaultProps'
+import { VNode } from 'vue'
+import { AllComponentProps } from './defaultProps'
 
 export interface PropToForm {
   component: string
@@ -20,7 +20,7 @@ export interface PropToForm {
 }
 
 export type PropsToForms = {
-  [P in keyof TextComponentProps]?: PropToForm
+  [P in keyof AllComponentProps]?: PropToForm
 }
 const fontFamilyArr = [
   { text: '宋体', value: '"SimSun","STSong"' },
@@ -59,7 +59,7 @@ export const propsToFormsMap: PropsToForms = {
     text: '行高',
     component: 'a-slider',
     extraProps: {
-      min: 0.1,
+      min: 0,
       max: 3,
       step: 0.1
     },
@@ -81,7 +81,7 @@ export const propsToFormsMap: PropsToForms = {
     component: 'a-select',
     subComponent: 'a-select-option',
     text: '字体',
-    options: [{ value: ' ', text: '无' }, ...fontFamilyOptions],
+    options: [{ value: '', text: '无' }, ...fontFamilyOptions],
     extraProps: {
       style: 'width:100px;'
     }
@@ -90,5 +90,29 @@ export const propsToFormsMap: PropsToForms = {
   color: {
     component: 'color-picker',
     text: '字体颜色'
+  },
+  textDecoration: {
+    component: 'switch-icon',
+    valueProp: 'checked',
+    extraProps: { iconName: 'ItalicOutlined', tip: '下划线' },
+    initialTransform: e => e === 'underline',
+    afterTransform: e => (e ? 'underline' : 'none')
+  },
+  fontStyle: {
+    component: 'switch-icon',
+    valueProp: 'checked',
+    extraProps: { iconName: 'BoldOutlined', tip: '斜体' },
+    initialTransform: e => e === 'italic',
+    afterTransform: e => (e ? 'italic' : 'normal')
+  },
+  fontWeight: {
+    component: 'switch-icon',
+    valueProp: 'checked',
+    extraProps: { iconName: 'BoldOutlined', tip: '加粗' },
+    initialTransform: e => e === 'bold',
+    afterTransform: e => (e ? 'bold' : 'normal')
+  },
+  src: {
+    component: 'image-processer'
   }
 }

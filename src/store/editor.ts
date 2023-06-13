@@ -1,12 +1,7 @@
 import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
-import { TextComponentProps } from '@/defaultProps'
-export interface ComponentData {
-  props: Partial<TextComponentProps>
-  id: string
-  name: string //组件名称 l-text l-image
-}
+import { AllComponentProps, ComponentData } from 'strive-lego-bricks'
 
 export interface EditorProps {
   components: ComponentData[]
@@ -26,9 +21,11 @@ export const editorTestComponents: ComponentData[] = [
       text: 'hello2',
       fontSize: '10px',
       fontWeight: 'bold',
+      fontStyle: 'italic',
+      textDecoration: 'underline',
       lineHeight: '2',
       textAlign: 'center',
-      fontFamily: ' ',
+      fontFamily: '',
       color: '#000000'
     }
   },
@@ -40,7 +37,8 @@ export const editorTestComponents: ComponentData[] = [
       fontSize: '15px',
       actionType: 'url',
       textAlign: 'right',
-      url: 'www.baidu.com'
+      url: 'www.baidu.com',
+      isEditing: true
     }
   }
 ]
@@ -51,13 +49,13 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     currentElementId: ''
   },
   mutations: {
-    addComponent(state, props: Partial<TextComponentProps>) {
-      const newComponent: ComponentData = {
-        id: uuidv4(),
-        name: 'l-text',
-        props
-      }
-      state.components.push(newComponent)
+    addComponent(state, component: ComponentData) {
+      state.components.push(component)
+    },
+    deleteComponent(state, id: string) {
+      state.components = state.components.filter(c => {
+        return c.id !== id
+      })
     },
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId
@@ -67,7 +65,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         c => c.id === state.currentElementId
       )
       if (shouldUpdateComponent) {
-        shouldUpdateComponent.props[key as keyof TextComponentProps] = value
+        shouldUpdateComponent.props[key as keyof AllComponentProps] = value
       }
     }
   },

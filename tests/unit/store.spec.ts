@@ -1,8 +1,9 @@
 import store from '@/store'
 import { templateTestData } from '@/store/templates'
-import { editorTestComponents, ComponentData } from '@/store/editor'
+import { ComponentData } from 'strive-lego-bricks'
 import { TextComponentProps } from '@/defaultProps'
 import { last, clone } from 'lodash-es'
+import { editorTestComponents } from '@/store/editor'
 const cloneComponents = clone(editorTestComponents)
 
 describe('test vuex store', () => {
@@ -52,8 +53,12 @@ describe('test vuex store', () => {
     })
 
     it('add component should works fine', () => {
-      const payload: Partial<TextComponentProps> = {
-        text: 'text1'
+      const payload: ComponentData = {
+        name: 'l-text',
+        id: '1234',
+        props: {
+          text: 'text1'
+        }
       }
       store.commit('addComponent', payload)
       expect(store.state.editor.components).toHaveLength(

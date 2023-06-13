@@ -50,7 +50,7 @@ import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
 import { defaultTextTemplates } from '@/defaultTemplates'
-import { ComponentData } from '@/store/editor'
+import { ComponentData } from 'strive-lego-bricks'
 import PropsTable from '@/components/PropsTable.vue'
 import LImage from '@/components/LImage.vue'
 // @ts-ignore

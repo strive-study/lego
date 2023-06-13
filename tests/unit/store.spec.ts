@@ -1,8 +1,9 @@
 import store from '@/store'
 import { templateTestData } from '@/store/templates'
-import { editorTestComponents, ComponentData } from '@/store/editor'
+import { ComponentData } from 'strive-lego-bricks'
 import { TextComponentProps } from '@/defaultProps'
 import { last, clone } from 'lodash-es'
+import { editorTestComponents } from '@/store/editor'
 const cloneComponents = clone(editorTestComponents)
 
 describe('test vuex store', () => {

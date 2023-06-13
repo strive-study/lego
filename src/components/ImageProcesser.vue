@@ -1,70 +1,109 @@
 <template>
   <div class="image-processer">
-    <Uploader
-      class="styled-uploader"
-      action="http://182.92.168.192:8081/api/utils/upload-img"
-      :before-upload="commonUploadCheck"
-      :show-upload-list="false"
-      @success="
-        data => {
-          handleUploadSuccess(data.res)
-        }
-      "
+    <a-modal
+      title="裁剪图片"
+      v-model:visible="showModal"
+      @ok="handleOk"
+      @cancle="showModal"
+      okText="确认"
+      cancelText="取消"
     >
-      <div class="uploader-container">
-        <UploadOutlined />
-        <h4>更换图片</h4>
+      <div class="image-cropper">
+        <img
+          :src="baseImageUrl"
+          ref="cropperImgRef"
+          id="processed-imaged"
+          alt=""
+        />
       </div>
-      <template #loading>
-        <div class="uploader-container">
-          <LoadingOutlined spin />
-          <h4>上传中</h4>
-        </div>
-      </template>
-      <template #uploaded>
-        <div class="uploader-container">
-          <UploadOutlined />
-          <h4>更换图片</h4>
-        </div>
-      </template>
-    </Uploader>
-    <a-button shape="round" size="large" @click="handleDelete">
-      <template #icon>
-        <CloseOutlined />
-      </template>
-      删除图片
-    </a-button>
+    </a-modal>
+    <div
+      class="image-preview"
+      :style="{ backgroundImage: backgroundUrl }"
+      :class="{ extraHeight: showDelete }"
+    ></div>
+    <div class="image-process">
+      <styled-uploader @success="handleUploadSuccess"></styled-uploader>
+      <a-button @click="showModal = true">
+        <template v-slot:icon><ScissorOutlined /></template>裁剪图片
+      </a-button>
+      <a-button v-if="showDelete" type="danger" @click="handleDelete">
+        <template v-slot:icon><DeleteOutlined /></template>删除图片
+      </a-button>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import {
-  UploadOutlined,
-  CloseOutlined,
-  LoadingOutlined
-} from '@ant-design/icons-vue'
-import Uploader from './Uploader.vue'
+import { computed, defineComponent, ref, watch, nextTick } from 'vue'
+import StyledUploader from './StyledUploader.vue'
+import { DeleteOutlined, ScissorOutlined } from '@ant-design/icons-vue'
 import { commonUploadCheck } from '../helper'
 import { UploadResp } from '@/extraType'
-
+import Cropper from 'cropperjs'
+interface CropDataProps {
+  x: number
+  y: number
+  width: number
+  height: number
+}
 export default defineComponent({
   props: {
-    // src: {
-    //   type: String,
-    //   required: true
-    // }
+    value: {
+      type: String,
+      required: true
+    },
+    ratio: {
+      type: Number
+    },
+    showDelete: {
+      type: Boolean,
+      default: false
+    }
   },
   components: {
-    CloseOutlined,
-    UploadOutlined,
-    LoadingOutlined,
-    Uploader
+    DeleteOutlined,
+    StyledUploader,
+    ScissorOutlined
   },
+  emits: ['change'],
   setup(props, { emit }) {
-    const handleUploadSuccess = (res: UploadResp) => {
-      console.log('更改', res)
-      emit('change', res.data.urls[0])
+    const showModal = ref(false)
+    const backgroundUrl = computed(() => `url(${props.value})`)
+    const cropperImgRef = ref<null | HTMLImageElement>(null)
+    let cropper: Cropper
+    let cropData: CropDataProps | null = null
+    let baseImageUrl = computed(() => props.value.split('?')[0])
+    watch(showModal, async newVal => {
+      if (newVal) {
+        await nextTick()
+        cropper = new Cropper(cropperImgRef.value!, {
+          crop(event) {
+            const { x, y, width, height } = event.detail
+            cropData = { x, y, width, height }
+            for (let i in cropData) {
+              let k = i as keyof CropDataProps
+              cropData[k] = Math.floor(cropData[k])
+            }
+            console.log(cropData)
+          }
+        })
+      } else {
+        cropper && cropper.destroy()
+      }
+    })
+    const handleOk = () => {
+      if (cropData) {
+        const { x, y, width, height } = cropData
+        const cropperUrl =
+          baseImageUrl.value +
+          `?x-oss-process=image/crop,x_${x},y_${y},w_${width},h_${height}`
+        emit('change', cropperUrl)
+      }
+      showModal.value = false
+    }
+    const handleUploadSuccess = (data: { res: UploadResp; file: File }) => {
+      emit('change', data.res.data.urls[0])
     }
     const handleDelete = () => {
       emit('change', '')
@@ -72,7 +111,12 @@ export default defineComponent({
     return {
       handleUploadSuccess,
       commonUploadCheck,
-      handleDelete
+      handleDelete,
+      handleOk,
+      backgroundUrl,
+      showModal,
+      cropperImgRef,
+      baseImageUrl
     }
   }
 })
@@ -81,29 +125,27 @@ export default defineComponent({
 <style scoped lang="scss">
 .image-processer {
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
 }
-.styled-uploader {
-  .uploader-container {
-    width: 130px;
-    height: 40px;
-    padding: 10px;
-    color: #ffffff;
-    background: #1890ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  }
-  .uploader-container:hover {
-    background: #40a9ff;
-  }
-  .uploader-container h4 {
-    color: #ffffff;
-    margin-bottom: 0;
-    margin-left: 10px;
-  }
+.image-preview {
+  width: 150px;
+  height: 84px;
+  border: 1px dashed #e6ebed;
+  background: no-repeat 50% / contain;
+}
+.image-preview.extraHeight {
+  height: 110px;
+}
+.image-cropper img {
+  display: block;
+  /* This rule is very important, please don't ignore this */
+  max-width: 100%;
+}
+.image-process {
+  padding: 5px 0;
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 </style>

@@ -1,16 +1,7 @@
 import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
-import {
-  AllComponentProps,
-  ImageComponentProps,
-  TextComponentProps
-} from '@/defaultProps'
-export interface ComponentData {
-  props: Partial<AllComponentProps & { isEditing: boolean }>
-  id: string
-  name: string //组件名称 l-text l-image
-}
+import { AllComponentProps, ComponentData } from 'strive-lego-bricks'
 
 export interface EditorProps {
   components: ComponentData[]

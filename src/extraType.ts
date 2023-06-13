@@ -11,4 +11,5 @@ export interface UploadResp {
   data: {
     urls: string[]
   }
+  message: string
 }

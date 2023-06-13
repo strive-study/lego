@@ -9,7 +9,6 @@
       cancelText="取消"
     >
       <div class="image-cropper">
-        <img :src="dataUrl" alt="" />
         <img
           :src="baseImageUrl"
           ref="cropperImgRef"
@@ -72,7 +71,6 @@ export default defineComponent({
   emits: ['change'],
   setup(props, { emit }) {
     const showModal = ref(false)
-    const dataUrl = ref('')
     const backgroundUrl = computed(() => `url(${props.value})`)
     const cropperImgRef = ref<null | HTMLImageElement>(null)
     let cropper: Cropper
@@ -102,26 +100,9 @@ export default defineComponent({
         const cropperUrl =
           baseImageUrl.value +
           `?x-oss-process=image/crop,x_${x},y_${y},w_${width},h_${height}`
-        cropper.getCroppedCanvas().toBlob(blob => {
-          if (blob) {
-            const formData = new FormData()
-            formData.append('croppedImage', blob, 'test.png')
-            axios
-              .post('http://localhost:7001/api/utils/upload-img', formData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: `Bearer ${token}`
-                }
-              })
-              .then(res => {
-                emit('change', res.data.data.urls[0])
-                showModal.value = false
-              })
-          }
-        })
-        // emit('change', cropperUrl)
+        emit('change', cropperUrl)
       }
-      // showModal.value = false
+      showModal.value = false
     }
     const handleUploadSuccess = (data: { res: UploadResp; file: File }) => {
       emit('change', data.res.data.urls[0])
@@ -137,8 +118,7 @@ export default defineComponent({
       backgroundUrl,
       showModal,
       cropperImgRef,
-      baseImageUrl,
-      dataUrl
+      baseImageUrl
     }
   }
 })

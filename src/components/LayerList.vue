@@ -27,7 +27,10 @@
           <template v-slot:icon v-else><LockOutlined /> </template>
         </a-button>
       </a-tooltip>
-      <span>{{ item.layerName }}</span>
+      <inline-edit
+        :value="item.layerName!"
+        @change="value => handleChange(item.id, 'layerName', value)"
+      ></inline-edit>
     </li>
   </ul>
 </template>
@@ -39,6 +42,7 @@ import {
   LockOutlined,
   UnlockOutlined
 } from '@ant-design/icons-vue'
+import InlineEdit from './InlineEdit.vue'
 import { ComponentData } from 'strive-lego-bricks'
 export default defineComponent({
   props: {
@@ -56,7 +60,8 @@ export default defineComponent({
     EyeOutlined,
     EyeInvisibleOutlined,
     LockOutlined,
-    UnlockOutlined
+    UnlockOutlined,
+    InlineEdit
   },
   setup(_props, context) {
     const handleClick = (id: string) => {

@@ -14,8 +14,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import useKeyPress from '@/hooks/useKeyPress'
+import useClickOutSide from '@/hooks/useClickOutside'
 const props = defineProps({
   value: {
     type: String,
@@ -23,15 +24,29 @@ const props = defineProps({
   }
 })
 const emits = defineEmits(['change'])
+const wrapper = ref<null | HTMLElement>(null)
+const inputRef = ref<null | HTMLInputElement>(null)
 const innerValue = ref(props.value)
-let cachedOldValue = ''
 const isEditing = ref(false)
+const isOutside = useClickOutSide(wrapper)
+let cachedOldValue = ''
+
 const handleClick = () => {
   isEditing.value = true
 }
-watch(isEditing, isEditing => {
+watch(isOutside, newVal => {
+  if (newVal && isEditing.value) {
+    isEditing.value = false
+    emits('change', innerValue.value)
+  }
+  // handleClick 停止冒泡，document无法感知到点击 手动置为false
+  isOutside.value = false
+})
+watch(isEditing, async isEditing => {
   if (isEditing) {
     cachedOldValue = innerValue.value
+    await nextTick()
+    inputRef.value?.focus()
   }
 })
 useKeyPress('Enter', () => {

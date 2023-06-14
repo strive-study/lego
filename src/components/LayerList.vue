@@ -1,64 +1,74 @@
 <template>
-  <ul
+  <Draggable
     :list="list"
+    item-key="1"
     class="ant-list-items ant-list-bordered"
-    @drop="onDrop"
-    @dragover="onDragOver"
+    ghost-class="ghost"
+    handle=".handle"
   >
-    <li
-      class="ant-list-item"
-      :class="{
-        active: item.id === selectedId,
-        ghost: dragData.currentDragging === item.id
-      }"
-      v-for="(item, index) in list"
-      :key="item.id"
-      @click="handleClick(item.id)"
-      draggable="true"
-      @dragstart="onDragStart($event, item.id, index)"
-      @dragenter="onDragEnter($event, index)"
-      :data-index="index"
-    >
-      <a-tooltip :title="item.isHidden ? '显示' : '隐藏'">
-        <a-button
-          shape="circle"
-          @click.stop="handleChange(item.id, 'isHidden', !item.isHidden)"
-        >
-          <template v-slot:icon v-if="item.isHidden"><EyeOutlined /> </template>
-          <template v-slot:icon v-else><EyeInvisibleOutlined /> </template>
-        </a-button>
-      </a-tooltip>
-      <a-tooltip :title="item.isLocked ? '解锁' : '锁定'">
-        <a-button
-          shape="circle"
-          @click.stop="handleChange(item.id, 'isLocked', !item.isLocked)"
-        >
-          <template v-slot:icon v-if="item.isLocked"
-            ><UnlockOutlined />
-          </template>
-          <template v-slot:icon v-else><LockOutlined /> </template>
-        </a-button>
-      </a-tooltip>
-      <inline-edit
-        :value="item.layerName!"
-        @change="value => handleChange(item.id, 'layerName', value)"
-      ></inline-edit>
-    </li>
-  </ul>
+    <template #item="{ element }">
+      <li
+        class="ant-list-item"
+        :class="{
+          active: element.id === selectedId
+        }"
+        :key="element.id"
+        @click="handleClick(element.id)"
+      >
+        <a-tooltip :title="element.isHidden ? '显示' : '隐藏'">
+          <a-button
+            shape="circle"
+            @click.stop="
+              handleChange(element.id, 'isHidden', !element.isHidden)
+            "
+          >
+            <template v-slot:icon v-if="element.isHidden"
+              ><EyeOutlined />
+            </template>
+            <template v-slot:icon v-else><EyeInvisibleOutlined /> </template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip :title="element.isLocked ? '解锁' : '锁定'">
+          <a-button
+            shape="circle"
+            @click.stop="
+              handleChange(element.id, 'isLocked', !element.isLocked)
+            "
+          >
+            <template v-slot:icon v-if="element.isLocked"
+              ><UnlockOutlined />
+            </template>
+            <template v-slot:icon v-else><LockOutlined /> </template>
+          </a-button>
+        </a-tooltip>
+        <inline-edit
+          class="edit-area"
+          :value="element.layerName!"
+          @change="value => handleChange(element.id, 'layerName', value)"
+        ></inline-edit>
+        <a-tooltip title="拖动排序">
+          <a-button shape="circle" class="handle">
+            <template v-slot:icon>
+              <DragOutlined />
+            </template>
+          </a-button>
+        </a-tooltip>
+      </li>
+    </template>
+  </Draggable>
 </template>
 <script lang="ts">
-import { defineComponent, PropType, reactive } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import {
   EyeOutlined,
   EyeInvisibleOutlined,
   LockOutlined,
-  UnlockOutlined
+  UnlockOutlined,
+  DragOutlined
 } from '@ant-design/icons-vue'
 import InlineEdit from './InlineEdit.vue'
 import { ComponentData } from 'strive-lego-bricks'
-import { getParentElement } from '@/helper'
-import { arrayMoveMutable } from 'array-move'
-import { emit } from 'process'
+import Draggable from 'vuedraggable'
 export default defineComponent({
   props: {
     list: {
@@ -70,49 +80,17 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['select', 'change', 'drop'],
+  emits: ['select', 'change'],
   components: {
     EyeOutlined,
     EyeInvisibleOutlined,
     LockOutlined,
     UnlockOutlined,
-    InlineEdit
+    DragOutlined,
+    InlineEdit,
+    Draggable
   },
-  setup(props, { emit }) {
-    const dragData = reactive({
-      currentDragging: '',
-      currentIndex: -1
-    })
-    let start = -1
-    let end = -1
-    const onDragStart = (e: DragEvent, id: string, index: number) => {
-      dragData.currentDragging = id
-      dragData.currentIndex = index
-      start = index
-    }
-    const onDrop = (e: DragEvent) => {
-      // 手动粗略实现 onDrop没什么用了其实
-      // const currentEle = getParentElement(
-      //   e.target as HTMLElement,
-      //   'ant-list-item'
-      // )
-      // if (currentEle?.dataset.index) {
-      //   const moveIndex = parseInt(currentEle.dataset.index)
-      //   arrayMoveMutable(props.list, dragData.currentIndex, moveIndex)
-      //   console.log(moveIndex)
-      // }
-      emit('drop', { start, end })
-      dragData.currentDragging = ''
-    }
-    const onDragOver = (e: DragEvent) => {
-      e.preventDefault()
-    }
-    const onDragEnter = (e: DragEvent, index: number) => {
-      if (index === dragData.currentIndex) return
-      arrayMoveMutable(props.list, dragData.currentIndex, index)
-      dragData.currentIndex = index
-      end = index
-    }
+  setup(_props, { emit }) {
     const handleClick = (id: string) => {
       emit('select', id)
     }
@@ -127,18 +105,13 @@ export default defineComponent({
     }
     return {
       handleChange,
-      handleClick,
-      onDragStart,
-      onDragEnter,
-      onDrop,
-      onDragOver,
-      dragData
+      handleClick
     }
   }
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .ant-list-item {
   padding: 10px 15px;
   transition: all 0.5s ease-out;
@@ -146,6 +119,9 @@ export default defineComponent({
   justify-content: normal;
   border: 1px solid #fff;
   border-bottom-color: #f0f0f0;
+  &.ghost {
+    opacity: 0.5;
+  }
 }
 .ant-list-item.active {
   border: 1px solid #1890ff;
@@ -159,7 +135,11 @@ export default defineComponent({
 .ant-list-item button {
   font-size: 12px;
 }
-.ghost {
-  opacity: 0.5;
+.ant-list-item .handle {
+  cursor: move;
+  margin-left: auto;
+}
+.ant-list-item .edit-area {
+  width: 100%;
 }
 </style>

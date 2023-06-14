@@ -34,6 +34,12 @@ let cachedOldValue = ''
 const handleClick = () => {
   isEditing.value = true
 }
+watch(
+  () => props.value,
+  newVal => {
+    innerValue.value = newVal
+  }
+)
 watch(isOutside, newVal => {
   if (newVal && isEditing.value) {
     isEditing.value = false

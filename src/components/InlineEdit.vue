@@ -7,25 +7,46 @@
       placeholder="文本不能为空"
       ref="inputRef"
     />
-    <slot v-else
+    <slot v-else :text="innerValue"
       ><span>{{ innerValue }}</span></slot
     >
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import useKeyPress from '@/hooks/useKeyPress'
 const props = defineProps({
   value: {
     type: String,
     required: true
   }
 })
+const emits = defineEmits(['change'])
 const innerValue = ref(props.value)
+let cachedOldValue = ''
 const isEditing = ref(false)
 const handleClick = () => {
   isEditing.value = true
 }
+watch(isEditing, isEditing => {
+  if (isEditing) {
+    cachedOldValue = innerValue.value
+  }
+})
+useKeyPress('Enter', () => {
+  if (isEditing.value) {
+    isEditing.value = false
+    emits('change', innerValue.value)
+  }
+})
+
+useKeyPress('Escape', () => {
+  if (isEditing.value) {
+    isEditing.value = false
+    innerValue.value = cachedOldValue
+  }
+})
 </script>
 
 <style scoped>

@@ -15,16 +15,18 @@
           <a-layout-content class="preview-container">
             <p>画布区域</p>
             <div class="preview-list" id="canvas-area">
-              <edit-wrapper
-                v-for="c in components"
-                :key="c.id"
-                :id="c.id"
-                :hidden="c.isHidden"
-                :is-active="c.id === currentElement?.id"
-                @set-active="handleSetActive"
-              >
-                <component v-bind="c.props" :is="c.name" class="item" />
-              </edit-wrapper>
+              <div class="body-container" :style="page.props">
+                <edit-wrapper
+                  v-for="c in components"
+                  :key="c.id"
+                  :id="c.id"
+                  :hidden="c.isHidden"
+                  :is-active="c.id === currentElement?.id"
+                  @set-active="handleSetActive"
+                >
+                  <component v-bind="c.props" :is="c.name" class="item" />
+                </edit-wrapper>
+              </div>
             </div>
           </a-layout-content>
         </a-layout>
@@ -56,6 +58,9 @@
               >
               </layer-list>
             </a-tab-pane>
+            <a-tab-pane key="page" tab="页面设置">
+              <props-table :props="page.props"> </props-table>
+            </a-tab-pane>
           </a-tabs>
           <pre>{{ currentElement?.props }}</pre>
         </a-layout-sider>
@@ -76,6 +81,7 @@ import { ComponentData } from 'strive-lego-bricks'
 import LImage from '@/components/LImage.vue'
 import LayerList from '@/components/LayerList.vue'
 import EditGroup from '@/components/EditGroup.vue'
+import PropsTable from '@/components/PropsTable.vue'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -86,11 +92,14 @@ export default defineComponent({
     'components-list': ComponentsList,
     'edit-wrapper': EditWrapper,
     'layer-list': LayerList,
-    'edit-group': EditGroup
+    'edit-group': EditGroup,
+    'props-table': PropsTable
   },
   setup() {
     const store = useStore<GlobalDataProps>()
     const components = computed(() => store.state.editor.components)
+    const page = computed(() => store.state.editor.page)
+
     const currentElement = computed<ComponentData | null>(
       () => store.getters.getCurrentElement
     )
@@ -112,6 +121,7 @@ export default defineComponent({
       defaultTextTemplates,
       currentElement,
       activePanel,
+      page,
       handleAddItem,
       handleSetActive,
       handleChange

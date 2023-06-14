@@ -10,7 +10,14 @@ import {
 
 export interface EditorProps {
   components: ComponentData[]
-  currentElementId: string //对应上面id
+  currentElementId: string
+  page: PageData
+}
+
+// 整体页面属性
+export interface PageData {
+  props: { [key: string]: any }
+  title: string
 }
 
 export const editorTestComponents: ComponentData[] = [
@@ -63,10 +70,22 @@ export const editorTestComponents: ComponentData[] = [
   }
 ]
 
+const pageDefaultProps = {
+  backgroundColor: '#ffffff',
+  backgroundImage: '',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: 'cover',
+  height: '560px'
+}
+
 const editor: Module<EditorProps, GlobalDataProps> = {
   state: {
     components: editorTestComponents,
-    currentElementId: ''
+    currentElementId: '',
+    page: {
+      props: pageDefaultProps,
+      title: 'test title'
+    }
   },
   mutations: {
     addComponent(state, component: ComponentData) {

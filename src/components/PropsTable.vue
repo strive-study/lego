@@ -9,7 +9,7 @@
     >
       <span class="item-label" v-if="item.text">{{ item.text }}</span>
       <component
-        class="item-component"
+        :class="`item-component component-${item.component}`"
         :is="item.component"
         :[item.valueProp]="item.value"
         v-bind="item.extraProps"
@@ -38,6 +38,8 @@ import RenderVnode from './renderVnode'
 import ColorPicker from './ColorPicker.vue'
 import SwitchIcon from './SwitchIcon.vue'
 import ImageProcesser from './ImageProcesser.vue'
+import ShadowPicker from './ShadowPicker.vue'
+import { AllComponentProps } from 'strive-lego-bricks'
 interface FormProps {
   component: string
   subComponent?: string
@@ -60,7 +62,7 @@ interface FormProps {
 export default defineComponent({
   props: {
     props: {
-      type: Object as PropType<Partial<TextComponentProps>>,
+      type: Object as PropType<Partial<AllComponentProps>>,
       required: true
     }
   },
@@ -68,7 +70,8 @@ export default defineComponent({
     'color-picker': ColorPicker,
     'render-vnode': RenderVnode,
     'switch-icon': SwitchIcon,
-    'image-processer': ImageProcesser
+    'image-processer': ImageProcesser,
+    'shadow-picker': ShadowPicker
   },
   emits: ['change'],
   setup(props, { emit }) {
@@ -117,7 +120,6 @@ export default defineComponent({
 .item {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   margin-bottom: 10px;
   &.no-text {
     display: inline-block;
@@ -127,31 +129,25 @@ export default defineComponent({
     width: 28%;
   }
   &-component {
-    width: 66%;
-  }
-  /* 文本 */
-  .ant-input {
-    border-radius: 20px;
-  }
-  /* 下拉框 */
-  ::v-deep .ant-select-selector {
-    border-radius: 20px;
-  }
-  /* 字号 */
-  .ant-input-number-input-wrap {
-    border-radius: 20px;
-  }
-  /* a-radio-group a-radio-button */
-  .ant-radio-button-wrapper:first-child {
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-  }
-  .ant-radio-button-wrapper:last-child {
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
+    width: 70%;
   }
 }
 #item-fontWeight {
   margin-left: 28%;
+}
+#item-boxShadow {
+  display: block;
+  width: 100%;
+}
+#item-src {
+  width: 100%;
+}
+.component-a-select .ant-select {
+  width: 150px;
+}
+.item-component.component-shadow-picker,
+.item-component.component-image-processer,
+.item-component.component-background-processer {
+  width: 100%;
 }
 </style>

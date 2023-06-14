@@ -33,11 +33,11 @@
           <a-tabs type="card" v-model:activeKey="activePanel">
             <a-tab-pane key="component" tab="属性设置" class="no-top-radius">
               <div v-if="currentElement">
-                <props-table
+                <edit-group
                   v-if="!currentElement.isLocked"
                   :props="currentElement.props"
                   @change="handleChange"
-                ></props-table>
+                ></edit-group>
                 <div v-else>
                   <a-empty>
                     <template #description>
@@ -73,9 +73,9 @@ import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
 import { defaultTextTemplates } from '@/defaultTemplates'
 import { ComponentData } from 'strive-lego-bricks'
-import PropsTable from '@/components/PropsTable.vue'
 import LImage from '@/components/LImage.vue'
 import LayerList from '@/components/LayerList.vue'
+import EditGroup from '@/components/EditGroup.vue'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -85,8 +85,8 @@ export default defineComponent({
     'l-image': LImage,
     'components-list': ComponentsList,
     'edit-wrapper': EditWrapper,
-    'props-table': PropsTable,
-    'layer-list': LayerList
+    'layer-list': LayerList,
+    'edit-group': EditGroup
   },
   setup() {
     const store = useStore<GlobalDataProps>()

@@ -1,7 +1,12 @@
 import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
-import { AllComponentProps, ComponentData } from 'strive-lego-bricks'
+import {
+  AllComponentProps,
+  ComponentData,
+  imageDefaultProps,
+  textDefaultProps
+} from 'strive-lego-bricks'
 
 export interface EditorProps {
   components: ComponentData[]
@@ -12,13 +17,14 @@ export const editorTestComponents: ComponentData[] = [
   {
     id: uuidv4(),
     name: 'l-text',
-    props: { text: 'hello', fontSize: '20px' },
+    props: { ...textDefaultProps, text: 'hello', fontSize: '20px' },
     layerName: '图层1'
   },
   {
     id: uuidv4(),
     name: 'l-text',
     props: {
+      ...textDefaultProps,
       text: 'hello2',
       fontSize: '10px',
       fontWeight: 'bold',
@@ -35,6 +41,7 @@ export const editorTestComponents: ComponentData[] = [
     id: uuidv4(),
     name: 'l-text',
     props: {
+      ...textDefaultProps,
       text: 'hello3',
       fontSize: '15px',
       actionType: 'url',
@@ -43,6 +50,16 @@ export const editorTestComponents: ComponentData[] = [
       isEditing: true
     },
     layerName: '图层3'
+  },
+  {
+    id: uuidv4(),
+    name: 'l-image',
+    layerName: '图层4',
+    props: {
+      ...imageDefaultProps,
+      src: 'http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f3e3a17c305b1070f455202.jpg',
+      width: '100px'
+    }
   }
 ]
 

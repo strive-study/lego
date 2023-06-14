@@ -1,11 +1,23 @@
 <template>
-  <ul :list="list" class="ant-list-items ant-list-bordered">
+  <ul
+    :list="list"
+    class="ant-list-items ant-list-bordered"
+    @drop="onDrop"
+    @dragover="onDragOver"
+  >
     <li
       class="ant-list-item"
-      :class="{ active: item.id === selectedId }"
-      v-for="item in list"
+      :class="{
+        active: item.id === selectedId,
+        ghost: dragData.currentDragging === item.id
+      }"
+      v-for="(item, index) in list"
       :key="item.id"
       @click="handleClick(item.id)"
+      draggable="true"
+      @dragstart="onDragStart($event, item.id, index)"
+      @dragenter="onDragEnter($event, index)"
+      :data-index="index"
     >
       <a-tooltip :title="item.isHidden ? '显示' : '隐藏'">
         <a-button
@@ -35,7 +47,7 @@
   </ul>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, reactive } from 'vue'
 import {
   EyeOutlined,
   EyeInvisibleOutlined,
@@ -44,6 +56,9 @@ import {
 } from '@ant-design/icons-vue'
 import InlineEdit from './InlineEdit.vue'
 import { ComponentData } from 'strive-lego-bricks'
+import { getParentElement } from '@/helper'
+import { arrayMoveMutable } from 'array-move'
+import { emit } from 'process'
 export default defineComponent({
   props: {
     list: {
@@ -55,7 +70,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['select', 'change'],
+  emits: ['select', 'change', 'drop'],
   components: {
     EyeOutlined,
     EyeInvisibleOutlined,
@@ -63,9 +78,43 @@ export default defineComponent({
     UnlockOutlined,
     InlineEdit
   },
-  setup(_props, context) {
+  setup(props, { emit }) {
+    const dragData = reactive({
+      currentDragging: '',
+      currentIndex: -1
+    })
+    let start = -1
+    let end = -1
+    const onDragStart = (e: DragEvent, id: string, index: number) => {
+      dragData.currentDragging = id
+      dragData.currentIndex = index
+      start = index
+    }
+    const onDrop = (e: DragEvent) => {
+      // 手动粗略实现 onDrop没什么用了其实
+      // const currentEle = getParentElement(
+      //   e.target as HTMLElement,
+      //   'ant-list-item'
+      // )
+      // if (currentEle?.dataset.index) {
+      //   const moveIndex = parseInt(currentEle.dataset.index)
+      //   arrayMoveMutable(props.list, dragData.currentIndex, moveIndex)
+      //   console.log(moveIndex)
+      // }
+      emit('drop', { start, end })
+      dragData.currentDragging = ''
+    }
+    const onDragOver = (e: DragEvent) => {
+      e.preventDefault()
+    }
+    const onDragEnter = (e: DragEvent, index: number) => {
+      if (index === dragData.currentIndex) return
+      arrayMoveMutable(props.list, dragData.currentIndex, index)
+      dragData.currentIndex = index
+      end = index
+    }
     const handleClick = (id: string) => {
-      context.emit('select', id)
+      emit('select', id)
     }
     const handleChange = (id: string, key: string, value: boolean) => {
       const data = {
@@ -74,11 +123,16 @@ export default defineComponent({
         value,
         isRoot: true // 修改根属性or修改props
       }
-      context.emit('change', data)
+      emit('change', data)
     }
     return {
       handleChange,
-      handleClick
+      handleClick,
+      onDragStart,
+      onDragEnter,
+      onDrop,
+      onDragOver,
+      dragData
     }
   }
 })
@@ -104,5 +158,8 @@ export default defineComponent({
 }
 .ant-list-item button {
   font-size: 12px;
+}
+.ghost {
+  opacity: 0.5;
 }
 </style>

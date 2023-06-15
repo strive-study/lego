@@ -203,7 +203,6 @@ export default defineComponent({
         })
         .then(res => {
           readyFile.status = 'success'
-          console.log(res)
           readyFile.resp = res.data
           emit('success', {
             res: res.data,
@@ -213,6 +212,7 @@ export default defineComponent({
         })
         .catch((e: any) => {
           readyFile.status = 'error'
+          console.log(e)
           emit('error', {
             error: e,
             file: readyFile,

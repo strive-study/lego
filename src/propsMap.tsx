@@ -1,6 +1,6 @@
 import { VNode } from 'vue'
-import { AllComponentProps } from './defaultProps'
-
+import { AllComponentProps } from 'strive-lego-bricks'
+import { AllFormProps } from './store/editor'
 export interface PropToForm {
   component: string
   subComponent?: string
@@ -20,7 +20,7 @@ export interface PropToForm {
 }
 
 export type PropsToForms = {
-  [P in keyof AllComponentProps]?: PropToForm
+  [P in keyof AllFormProps]?: PropToForm
 }
 const fontFamilyArr = [
   { text: '宋体', value: '"SimSun","STSong"' },
@@ -207,5 +207,23 @@ export const propsToFormsMap: PropsToForms = {
     ...defaultHandler,
     afterTransform: (e: any) => e.target.value,
     text: '链接'
+  },
+  backgroundImage: {
+    ...defaultHandler,
+    component: 'background-processer',
+    initialTransform: (v: string) => {
+      if (v) {
+        const reg = /\(["'](.+)["']\)/g
+        const matches = reg.exec(v)
+        if (matches && matches.length > 1) {
+          return matches[1]
+        } else {
+          return ''
+        }
+      } else {
+        return ''
+      }
+    },
+    afterTransform: v => (v ? `url('${v}')` : '')
   }
 }

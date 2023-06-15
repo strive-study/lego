@@ -87,7 +87,6 @@ export default defineComponent({
               let k = i as keyof CropDataProps
               cropData[k] = Math.floor(cropData[k])
             }
-            console.log(cropData)
           }
         })
       } else {

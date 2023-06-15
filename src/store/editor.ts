@@ -13,13 +13,20 @@ export interface EditorProps {
   currentElementId: string
   page: PageData
 }
+export interface PageProps {
+  backgroundColor: string
+  backgroundImage: string
+  backgroundRepeat: string
+  backgroundSize: string
+  height: string
+}
 
 // 整体页面属性
 export interface PageData {
-  props: { [key: string]: any }
+  props: PageProps
   title: string
 }
-
+export type AllFormProps = PageProps & AllComponentProps
 export const editorTestComponents: ComponentData[] = [
   {
     id: uuidv4(),
@@ -72,7 +79,8 @@ export const editorTestComponents: ComponentData[] = [
 
 const pageDefaultProps = {
   backgroundColor: '#ffffff',
-  backgroundImage: '',
+  backgroundImage:
+    'url("https://static.imooc-lego.com/upload-files/%E5%B9%BC%E5%84%BF%E5%9B%AD%E8%83%8C%E6%99%AF%E5%9B%BE-994372.jpg")',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
   height: '560px'
@@ -111,6 +119,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           shouldUpdateComponent.props[key as keyof AllComponentProps] = value
         }
       }
+    },
+    updatePage(state, { key, value }) {
+      state.page.props[key as keyof PageProps] = value
     }
   },
   getters: {

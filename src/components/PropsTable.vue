@@ -39,6 +39,7 @@ import ColorPicker from './ColorPicker.vue'
 import SwitchIcon from './SwitchIcon.vue'
 import ImageProcesser from './ImageProcesser.vue'
 import ShadowPicker from './ShadowPicker.vue'
+import BackgroundProcesser from './BackgroundProcesser.vue'
 import { AllComponentProps } from 'strive-lego-bricks'
 interface FormProps {
   component: string
@@ -71,7 +72,8 @@ export default defineComponent({
     'render-vnode': RenderVnode,
     'switch-icon': SwitchIcon,
     'image-processer': ImageProcesser,
-    'shadow-picker': ShadowPicker
+    'shadow-picker': ShadowPicker,
+    'background-processer': BackgroundProcesser
   },
   emits: ['change'],
   setup(props, { emit }) {
@@ -101,7 +103,6 @@ export default defineComponent({
                   })
               }
             }
-
             result[newKey] = newItem
           }
           return result

@@ -84,6 +84,7 @@ import LImage from '@/components/LImage.vue'
 import LayerList from '@/components/LayerList.vue'
 import EditGroup from '@/components/EditGroup.vue'
 import PropsTable from '@/components/PropsTable.vue'
+import { pickBy, forEach } from 'lodash-es'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -128,16 +129,10 @@ export default defineComponent({
       top: number
       id: string
     }) => {
-      const { left, top, id } = data
-      store.commit('updateComponent', {
-        key: 'left',
-        value: left + 'px',
-        id
-      })
-      store.commit('updateComponent', {
-        key: 'top',
-        value: top + 'px',
-        id
+      const { id } = data
+      const updateData = pickBy(data, (v, k) => k !== 'id')
+      forEach(updateData, (v, key) => {
+        store.commit('updateComponent', { key, value: v + 'px', id })
       })
     }
     return {

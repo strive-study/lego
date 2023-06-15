@@ -22,6 +22,7 @@
                   :id="c.id"
                   :hidden="c.isHidden"
                   :is-active="c.id === currentElement?.id"
+                  :props="c.props"
                   @set-active="handleSetActive"
                 >
                   <component v-bind="c.props" :is="c.name" class="item" />

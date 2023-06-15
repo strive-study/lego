@@ -45,7 +45,7 @@ export default defineComponent({
 .l-text-component {
   box-sizing: border-box;
   white-space: pre-wrap;
-  position: relative !important;
+  /* position: relative !important; */
 }
 h2.l-text-component,
 p.l-text-component {

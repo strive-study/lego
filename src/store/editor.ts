@@ -2,12 +2,17 @@ import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
 import {
+  // AllComponentProps,
+  ComponentData
+  // imageDefaultProps,
+  // textDefaultProps
+} from 'strive-lego-bricks'
+import {
   AllComponentProps,
-  ComponentData,
+  // ComponentData,
   imageDefaultProps,
   textDefaultProps
-} from 'strive-lego-bricks'
-
+} from '../defaultProps'
 export interface EditorProps {
   components: ComponentData[]
   currentElementId: string
@@ -31,50 +36,63 @@ export const editorTestComponents: ComponentData[] = [
   {
     id: uuidv4(),
     name: 'l-text',
-    props: { ...textDefaultProps, text: 'hello', fontSize: '20px' },
-    layerName: '图层1'
-  },
-  {
-    id: uuidv4(),
-    name: 'l-text',
+    layerName: '图层1',
     props: {
       ...textDefaultProps,
-      text: 'hello2',
-      fontSize: '10px',
-      fontWeight: 'bold',
-      fontStyle: 'italic',
-      textDecoration: 'underline',
-      lineHeight: '2',
-      textAlign: 'center',
+      text: 'hello',
+      fontSize: '20px',
+      color: '#000000',
+      lineHeight: '1',
+      textAlign: 'left',
       fontFamily: '',
-      color: '#000000'
-    },
-    layerName: '图层2'
-  },
-  {
-    id: uuidv4(),
-    name: 'l-text',
-    props: {
-      ...textDefaultProps,
-      text: 'hello3',
-      fontSize: '15px',
-      actionType: 'url',
-      textAlign: 'right',
-      url: 'www.baidu.com',
-      isEditing: true
-    },
-    layerName: '图层3'
-  },
-  {
-    id: uuidv4(),
-    name: 'l-image',
-    layerName: '图层4',
-    props: {
-      ...imageDefaultProps,
-      src: 'http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f3e3a17c305b1070f455202.jpg',
-      width: '100px'
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#efefef',
+      left: '10px',
+      top: '10px'
     }
   }
+  // {
+  //   id: uuidv4(),
+  //   name: 'l-text',
+  //   props: {
+  //     ...textDefaultProps,
+  //     text: 'hello2',
+  //     fontSize: '10px',
+  //     fontWeight: 'bold',
+  //     fontStyle: 'italic',
+  //     textDecoration: 'underline',
+  //     lineHeight: '2',
+  //     textAlign: 'center',
+  //     fontFamily: '',
+  //     color: '#000000'
+  //   },
+  //   layerName: '图层2'
+  // },
+  // {
+  //   id: uuidv4(),
+  //   name: 'l-text',
+  //   props: {
+  //     ...textDefaultProps,
+  //     text: 'hello3',
+  //     fontSize: '15px',
+  //     actionType: 'url',
+  //     textAlign: 'right',
+  //     url: 'www.baidu.com',
+  //     isEditing: true
+  //   },
+  //   layerName: '图层3'
+  // },
+  // {
+  //   id: uuidv4(),
+  //   name: 'l-image',
+  //   layerName: '图层4',
+  //   props: {
+  //     ...imageDefaultProps,
+  //     src: 'http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f3e3a17c305b1070f455202.jpg',
+  //     width: '100px'
+  //   }
+  // }
 ]
 
 const pageDefaultProps = {

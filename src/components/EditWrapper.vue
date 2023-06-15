@@ -184,7 +184,7 @@ const startMove = (e: MouseEvent) => {
   border: 1px solid transparent;
   user-select: none;
   box-sizing: content-box !important;
-  & > ::v-deep * {
+  & > ::v-deep *:not(.resizers) {
     position: static !important;
     width: 100% !important;
     height: 100% !important;

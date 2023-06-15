@@ -23,6 +23,7 @@
                   :hidden="c.isHidden"
                   :is-active="c.id === currentElement?.id"
                   :props="c.props"
+                  @update-position="updatePosition"
                   @set-active="handleSetActive"
                 >
                   <component v-bind="c.props" :is="c.name" class="item" />
@@ -64,7 +65,6 @@
               </props-table>
             </a-tab-pane>
           </a-tabs>
-          <pre>{{ currentElement?.props }}</pre>
         </a-layout-sider>
       </a-layout>
     </a-layout-content>
@@ -122,6 +122,24 @@ export default defineComponent({
     const pageChange = (e: any) => {
       store.commit('updatePage', e)
     }
+
+    const updatePosition = (data: {
+      left: number
+      top: number
+      id: string
+    }) => {
+      const { left, top, id } = data
+      store.commit('updateComponent', {
+        key: 'left',
+        value: left + 'px',
+        id
+      })
+      store.commit('updateComponent', {
+        key: 'top',
+        value: top + 'px',
+        id
+      })
+    }
     return {
       components,
       defaultTextTemplates,
@@ -131,7 +149,8 @@ export default defineComponent({
       handleAddItem,
       handleSetActive,
       handleChange,
-      pageChange
+      pageChange,
+      updatePosition
     }
   }
 })

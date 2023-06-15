@@ -30,7 +30,6 @@
         </div>
       </a-col>
     </a-row>
-    <pre>{{ route }}</pre>
   </div>
 </template>
 

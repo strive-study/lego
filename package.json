@@ -17,6 +17,7 @@
     "axios": "^1.4.0",
     "core-js": "^3.8.3",
     "cropperjs": "^1.5.13",
+    "hotkeys-js": "^3.10.2",
     "lego-bricks": "1.0.0",
     "lodash-es": "^4.17.21",
     "strive-lego-bricks": "^1.0.8",

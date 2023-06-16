@@ -78,16 +78,18 @@ import { computed, defineComponent, ref } from 'vue'
 import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
-import { defaultTextTemplates } from '@/defaultTemplates'
+import defaultTextTemplates from '@/defaultTemplates'
 import { ComponentData } from 'strive-lego-bricks'
 import LImage from '@/components/LImage.vue'
 import LayerList from '@/components/LayerList.vue'
 import EditGroup from '@/components/EditGroup.vue'
 import PropsTable from '@/components/PropsTable.vue'
 import { pickBy, forEach } from 'lodash-es'
+import initHotKeys from '@/plugins/hotKeys'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
+
 export default defineComponent({
   components: {
     'l-text': LText,
@@ -99,6 +101,7 @@ export default defineComponent({
     'props-table': PropsTable
   },
   setup() {
+    initHotKeys()
     const store = useStore<GlobalDataProps>()
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)

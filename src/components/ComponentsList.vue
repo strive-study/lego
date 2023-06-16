@@ -56,10 +56,13 @@ const onImageUploaded = (res: UploadResp) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .components-item {
   width: 100px;
   margin: 0 auto;
   margin-bottom: 15px;
+  & > * {
+    position: static !important;
+  }
 }
 </style>

@@ -1,19 +1,24 @@
-export const defaultTextTemplates = [
+import { textDefaultProps } from './defaultProps'
+
+const defaultTextTemplates = [
   {
     text: '大标题',
     fontSize: '30px',
     fontWeight: 'bold',
-    tag: 'h2'
+    tag: 'h2',
+    width: '100px'
   },
   {
     text: '正文内容',
-    tag: 'p'
+    tag: 'p',
+    width: '100px'
   },
   {
     text: '链接内容',
     color: '#1890ff',
     textDecoration: 'underline',
-    tag: 'p'
+    tag: 'p',
+    width: '100px'
   },
   {
     text: '按钮内容',
@@ -29,6 +34,12 @@ export const defaultTextTemplates = [
     paddingBottom: '5px',
     width: '100px',
     tag: 'button',
-    textAlign: 'center'
+    textAlign: 'center',
+    position: 'absolute'
   }
 ]
+
+export default defaultTextTemplates.map(template => ({
+  ...textDefaultProps,
+  ...template
+}))

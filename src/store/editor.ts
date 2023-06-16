@@ -164,7 +164,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       }
     },
     moveComponent(
-      state,
+      _state,
       data: { direction: MoveDirection; amount: number; id: string }
     ) {
       const { direction, amount, id } = data

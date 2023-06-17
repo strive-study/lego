@@ -37,6 +37,7 @@ export interface EditorProps {
   copiedComponent?: ComponentData
   histories: HistoryProps[] // 历史操作记录栈
   historyIndex: number // 记录栈中所处操作记录位置
+  cachedOldValues: any // 开始更新时的缓存值
 }
 export interface PageProps {
   backgroundColor: string
@@ -143,7 +144,28 @@ const pageDefaultProps = {
   backgroundSize: 'cover',
   height: '560px'
 }
-
+const debounceChange = (callback: (...args: any) => void, timeout = 1000) => {
+  let timer: any = null
+  return (...args: any) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      callback(...args)
+    }, timeout)
+  }
+}
+const pushModifyHistory = (
+  state: EditorProps,
+  { key, value, id }: UpdateComponentData
+) => {
+  state.histories.push({
+    id: uuidv4(),
+    componentId: id || state.currentElementId,
+    type: 'modify',
+    data: { oldValue: state.cachedOldValues, newValue: value, key }
+  })
+  state.cachedOldValues = null
+}
+const pushHistoryDebounce = debounceChange(pushModifyHistory)
 const editor: Module<EditorProps, GlobalDataProps> = {
   state: {
     components: editorTestComponents,
@@ -153,7 +175,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       title: 'test title'
     },
     histories: [],
-    historyIndex: -1
+    historyIndex: -1,
+    cachedOldValues: null
   },
   mutations: {
     resetEditor(state) {
@@ -215,14 +238,6 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break
         }
         case 'modify': {
-          // const { componentId, data } = history
-          // const { key, oldValue } = data
-          // const updatedComponent = state.components.find(
-          //   c => c.id === componentId
-          // )
-          // if (updatedComponent) {
-          //   updatedComponent.props[key as keyof AllComponentProps] = oldValue
-          // }
           modifyHistory(state, history, 'undo')
           break
         }
@@ -246,14 +261,6 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break
         }
         case 'modify': {
-          // const { componentId, data } = history
-          // const { key, newValue } = data
-          // const updatedComponent = state.components.find(
-          //   component => component.id === componentId
-          // )
-          // if (updatedComponent) {
-          //   updatedComponent.props[key as keyof AllComponentProps] = newValue
-          // }
           modifyHistory(state, history, 'redo')
           break
         }
@@ -273,16 +280,10 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           const oldValue = isArray(key)
             ? key.map(key => shouldUpdateComponent.props[key])
             : shouldUpdateComponent.props[key]
-          state.histories.push({
-            id: uuidv4(),
-            componentId: id || state.currentElementId,
-            type: 'modify',
-            data: {
-              oldValue,
-              newValue: value,
-              key
-            }
-          })
+          if (!state.cachedOldValues) {
+            state.cachedOldValues = oldValue
+          }
+          pushHistoryDebounce(state, { key, value, id })
           if (isArray(key) && isArray(value)) {
             key.forEach((keyName, index) => {
               shouldUpdateComponent.props[keyName] = value[index]

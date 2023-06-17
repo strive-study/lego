@@ -86,7 +86,7 @@ import LayerList from '@/components/LayerList.vue'
 import EditGroup from '@/components/EditGroup.vue'
 import PropsTable from '@/components/PropsTable.vue'
 import HistoryArea from './editor/HistoryArea.vue'
-import { pickBy, forEach } from 'lodash-es'
+import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'

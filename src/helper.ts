@@ -64,9 +64,5 @@ export const getParentElement = (element: HTMLElement, className: string) => {
 }
 
 export const insertAt = (arr: any[], index: number, newItem: any) => {
-  return {
-    ...arr.slice(0, index),
-    newItem,
-    ...arr.slice(index)
-  }
+  return [...arr.slice(0, index), newItem, ...arr.slice(index)]
 }

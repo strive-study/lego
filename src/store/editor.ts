@@ -130,6 +130,11 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     historyIndex: -1
   },
   mutations: {
+    resetEditor(state) {
+      state.components = []
+      ;(state.currentElementId = ''), (state.histories = [])
+      state.historyIndex = -1
+    },
     addComponent(state, component: ComponentData) {
       component.layerName = '图层' + (state.components.length + 1)
       state.components.push(component)
@@ -161,6 +166,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.currentElementId = currentElementId
     },
     undo(state) {
+      // reset default
       if (state.historyIndex === -1) {
         state.historyIndex = state.histories.length - 1
       } else {
@@ -194,6 +200,37 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break
         }
       }
+    },
+    redo(state) {
+      // reset default
+      if (state.historyIndex === -1) {
+        return
+      }
+      const history = state.histories[state.historyIndex]
+      switch (history.type) {
+        case 'add': {
+          state.components.push(history.data)
+          break
+        }
+        case 'delete': {
+          state.components = state.components.filter(
+            component => component.id !== history.componentId
+          )
+          break
+        }
+        case 'modify': {
+          const { componentId, data } = history
+          const { key, newValue } = data
+          const updatedComponent = state.components.find(
+            component => component.id === componentId
+          )
+          if (updatedComponent) {
+            updatedComponent.props[key as keyof AllComponentProps] = newValue
+          }
+          break
+        }
+      }
+      state.historyIndex++
     },
     updateComponent(state, { key, value, id, isRoot }) {
       const shouldUpdateComponent = state.components.find(
@@ -294,7 +331,25 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       return state.components.find(c => c.id === state.currentElementId)
     },
     getElement: state => (id: string) =>
-      state.components.find(c => c.id === (id || state.currentElementId))
+      state.components.find(c => c.id === (id || state.currentElementId)),
+    checkUndoDisable: state => {
+      // 无历史操作记录 和 到记录栈尽头不能点击
+      if (state.histories.length === 0 || state.historyIndex === 0) {
+        return true
+      }
+      return false
+    },
+    checkRedoDisable: state => {
+      // 无历史操作记录 和 到记录栈尽头不能点击
+      if (
+        state.histories.length === 0 ||
+        state.historyIndex === state.histories.length ||
+        state.historyIndex === -1
+      ) {
+        return true
+      }
+      return false
+    }
   }
 }
 

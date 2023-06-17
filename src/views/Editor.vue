@@ -137,9 +137,9 @@ export default defineComponent({
     }) => {
       const { id } = data
       const updateData = pickBy(data, (v, k) => k !== 'id')
-      forEach(updateData, (v, key) => {
-        store.commit('updateComponent', { key, value: v + 'px', id })
-      })
+      const keysArr = Object.keys(updateData)
+      const valueArr = Object.values(updateData).map(v => v + 'px')
+      store.commit('updateComponent', { key: keysArr, value: valueArr, id })
     }
     return {
       components,

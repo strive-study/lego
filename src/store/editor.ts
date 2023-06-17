@@ -14,7 +14,7 @@ import {
   textDefaultProps
 } from '../defaultProps'
 import { message } from 'ant-design-vue'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
 export interface HistoryProps {
   id: string
@@ -22,6 +22,12 @@ export interface HistoryProps {
   type: 'add' | 'delete' | 'modify'
   data: any
   index?: number
+}
+export interface UpdateComponentData {
+  key: keyof AllComponentProps | Array<keyof AllComponentProps>
+  value: string | string[]
+  id: string
+  isRoot?: boolean
 }
 export type MoveDirection = 'Up' | 'Down' | 'Left' | 'Right'
 export interface EditorProps {
@@ -108,7 +114,27 @@ export const editorTestComponents: ComponentData[] = [
   //   }
   // }
 ]
-
+const modifyHistory = (
+  state: EditorProps,
+  history: HistoryProps,
+  type: 'undo' | 'redo'
+) => {
+  const { componentId, data } = history
+  const { key, oldValue, newValue } = data
+  const newKey = key as keyof AllComponentProps | Array<keyof AllComponentProps>
+  const shouldUpdateComponent = state.components.find(c => c.id === componentId)
+  if (shouldUpdateComponent) {
+    if (isArray(newKey)) {
+      newKey.forEach((keyName, index) => {
+        shouldUpdateComponent.props[keyName] =
+          type === 'undo' ? oldValue[index] : newValue[index]
+      })
+    } else {
+      shouldUpdateComponent.props[newKey] =
+        type === 'undo' ? oldValue : newValue
+    }
+  }
+}
 const pageDefaultProps = {
   backgroundColor: '#ffffff',
   backgroundImage:
@@ -189,14 +215,15 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break
         }
         case 'modify': {
-          const { componentId, data } = history
-          const { key, oldValue } = data
-          const updatedComponent = state.components.find(
-            c => c.id === componentId
-          )
-          if (updatedComponent) {
-            updatedComponent.props[key as keyof AllComponentProps] = oldValue
-          }
+          // const { componentId, data } = history
+          // const { key, oldValue } = data
+          // const updatedComponent = state.components.find(
+          //   c => c.id === componentId
+          // )
+          // if (updatedComponent) {
+          //   updatedComponent.props[key as keyof AllComponentProps] = oldValue
+          // }
+          modifyHistory(state, history, 'undo')
           break
         }
       }
@@ -219,31 +246,33 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break
         }
         case 'modify': {
-          const { componentId, data } = history
-          const { key, newValue } = data
-          const updatedComponent = state.components.find(
-            component => component.id === componentId
-          )
-          if (updatedComponent) {
-            updatedComponent.props[key as keyof AllComponentProps] = newValue
-          }
+          // const { componentId, data } = history
+          // const { key, newValue } = data
+          // const updatedComponent = state.components.find(
+          //   component => component.id === componentId
+          // )
+          // if (updatedComponent) {
+          //   updatedComponent.props[key as keyof AllComponentProps] = newValue
+          // }
+          modifyHistory(state, history, 'redo')
           break
         }
       }
       state.historyIndex++
     },
-    updateComponent(state, { key, value, id, isRoot }) {
+    updateComponent(state, { key, value, id, isRoot }: UpdateComponentData) {
       const shouldUpdateComponent = state.components.find(
         c => c.id === (id || state.currentElementId)
       )
+
       if (shouldUpdateComponent) {
         if (isRoot) {
           // ts bug issues/31663
-          ;(shouldUpdateComponent as any)[key] = value
+          ;(shouldUpdateComponent as any)[key as string] = value
         } else {
-          const oldValue =
-            shouldUpdateComponent.props[key as keyof AllComponentProps]
-          shouldUpdateComponent.props[key as keyof AllComponentProps] = value
+          const oldValue = isArray(key)
+            ? key.map(key => shouldUpdateComponent.props[key])
+            : shouldUpdateComponent.props[key]
           state.histories.push({
             id: uuidv4(),
             componentId: id || state.currentElementId,
@@ -254,6 +283,13 @@ const editor: Module<EditorProps, GlobalDataProps> = {
               key
             }
           })
+          if (isArray(key) && isArray(value)) {
+            key.forEach((keyName, index) => {
+              shouldUpdateComponent.props[keyName] = value[index]
+            })
+          } else if (typeof key === 'string' && typeof value === 'string') {
+            shouldUpdateComponent.props[key] = value
+          }
         }
       }
     },

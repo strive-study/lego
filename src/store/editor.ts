@@ -15,6 +15,7 @@ import {
 } from '../defaultProps'
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
+import { insertAt } from '@/helper'
 export interface HistoryProps {
   id: string
   componentId: string
@@ -28,8 +29,8 @@ export interface EditorProps {
   currentElementId: string
   page: PageData
   copiedComponent?: ComponentData
-  histories: HistoryProps[]
-  historyIndex: number
+  histories: HistoryProps[] // 历史操作记录栈
+  historyIndex: number // 记录栈中所处操作记录位置
 }
 export interface PageProps {
   backgroundColor: string
@@ -158,6 +159,41 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     },
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId
+    },
+    undo(state) {
+      if (state.historyIndex === -1) {
+        state.historyIndex = state.histories.length - 1
+      } else {
+        state.historyIndex--
+      }
+      const history = state.histories[state.historyIndex]
+      switch (history.type) {
+        case 'add': {
+          state.components = state.components.filter(
+            c => c.id !== history.componentId
+          )
+          break
+        }
+        case 'delete': {
+          state.components = insertAt(
+            state.components,
+            history.index as number,
+            history.data
+          )
+          break
+        }
+        case 'modify': {
+          const { componentId, data } = history
+          const { key, oldValue } = data
+          const updatedComponent = state.components.find(
+            c => c.id === componentId
+          )
+          if (updatedComponent) {
+            updatedComponent.props[key as keyof AllComponentProps] = oldValue
+          }
+          break
+        }
+      }
     },
     updateComponent(state, { key, value, id, isRoot }) {
       const shouldUpdateComponent = state.components.find(

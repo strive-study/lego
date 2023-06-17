@@ -38,6 +38,7 @@ export interface EditorProps {
   histories: HistoryProps[] // 历史操作记录栈
   historyIndex: number // 记录栈中所处操作记录位置
   cachedOldValues: any // 开始更新时的缓存值
+  maxHistoryNumber: number
 }
 export interface PageProps {
   backgroundColor: string
@@ -153,11 +154,26 @@ const debounceChange = (callback: (...args: any) => void, timeout = 1000) => {
     }, timeout)
   }
 }
+
+const pushHistory = (state: EditorProps, historyRecord: HistoryProps) => {
+  // 移动过则把当前index之后的记录全部清空
+  if (state.historyIndex !== -1) {
+    state.histories = state.histories.slice(0, state.historyIndex)
+    state.historyIndex = -1
+  }
+  // 超过记录栈最大长度 使用LRU缓存模式
+  if (state.histories.length < state.maxHistoryNumber) {
+    state.histories.push(historyRecord)
+  } else {
+    state.histories.shift()
+    state.histories.push(historyRecord)
+  }
+}
 const pushModifyHistory = (
   state: EditorProps,
   { key, value, id }: UpdateComponentData
 ) => {
-  state.histories.push({
+  pushHistory(state, {
     id: uuidv4(),
     componentId: id || state.currentElementId,
     type: 'modify',
@@ -176,7 +192,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     },
     histories: [],
     historyIndex: -1,
-    cachedOldValues: null
+    cachedOldValues: null,
+    maxHistoryNumber: 5
   },
   mutations: {
     resetEditor(state) {
@@ -187,7 +204,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     addComponent(state, component: ComponentData) {
       component.layerName = '图层' + (state.components.length + 1)
       state.components.push(component)
-      state.histories.push({
+      pushHistory(state, {
         id: uuidv4(),
         componentId: component.id,
         type: 'add',
@@ -201,7 +218,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         state.components = state.components.filter(c => {
           return c.id !== id
         })
-        state.histories.push({
+        pushHistory(state, {
           id: uuidv4(),
           componentId: currentComponent.id,
           type: 'delete',
@@ -267,11 +284,11 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       }
       state.historyIndex++
     },
+    // 防抖更新
     updateComponent(state, { key, value, id, isRoot }: UpdateComponentData) {
       const shouldUpdateComponent = state.components.find(
         c => c.id === (id || state.currentElementId)
       )
-
       if (shouldUpdateComponent) {
         if (isRoot) {
           // ts bug issues/31663
@@ -311,7 +328,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         clone.layerName = clone.layerName + '副本'
         state.components.push(clone)
         message.success('已黏贴当前图层', 1)
-        state.histories.push({
+        pushHistory(state, {
           id: uuidv4(),
           componentId: clone.id,
           type: 'add',

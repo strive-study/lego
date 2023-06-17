@@ -15,12 +15,21 @@ import {
 } from '../defaultProps'
 import { message } from 'ant-design-vue'
 import { cloneDeep } from 'lodash-es'
+export interface HistoryProps {
+  id: string
+  componentId: string
+  type: 'add' | 'delete' | 'modify'
+  data: any
+  index?: number
+}
 export type MoveDirection = 'Up' | 'Down' | 'Left' | 'Right'
 export interface EditorProps {
   components: ComponentData[]
   currentElementId: string
   page: PageData
   copiedComponent?: ComponentData
+  histories: HistoryProps[]
+  historyIndex: number
 }
 export interface PageProps {
   backgroundColor: string
@@ -115,18 +124,37 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     page: {
       props: pageDefaultProps,
       title: 'test title'
-    }
+    },
+    histories: [],
+    historyIndex: -1
   },
   mutations: {
     addComponent(state, component: ComponentData) {
       component.layerName = '图层' + (state.components.length + 1)
       state.components.push(component)
+      state.histories.push({
+        id: uuidv4(),
+        componentId: component.id,
+        type: 'add',
+        data: cloneDeep(component)
+      })
     },
     deleteComponent(state, id: string) {
-      state.components = state.components.filter(c => {
-        return c.id !== id
-      })
-      message.success('删除当前图层成功', 1)
+      const currentComponent = state.components.find(c => c.id === id)
+      if (currentComponent) {
+        const currentIndex = state.components.findIndex(c => c.id === id)
+        state.components = state.components.filter(c => {
+          return c.id !== id
+        })
+        state.histories.push({
+          id: uuidv4(),
+          componentId: currentComponent.id,
+          type: 'delete',
+          data: currentComponent,
+          index: currentIndex
+        })
+        message.success('删除当前图层成功', 1)
+      }
     },
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId
@@ -140,7 +168,19 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           // ts bug issues/31663
           ;(shouldUpdateComponent as any)[key] = value
         } else {
+          const oldValue =
+            shouldUpdateComponent.props[key as keyof AllComponentProps]
           shouldUpdateComponent.props[key as keyof AllComponentProps] = value
+          state.histories.push({
+            id: uuidv4(),
+            componentId: id || state.currentElementId,
+            type: 'modify',
+            data: {
+              oldValue,
+              newValue: value,
+              key
+            }
+          })
         }
       }
     },
@@ -161,6 +201,12 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         clone.layerName = clone.layerName + '副本'
         state.components.push(clone)
         message.success('已黏贴当前图层', 1)
+        state.histories.push({
+          id: uuidv4(),
+          componentId: clone.id,
+          type: 'add',
+          data: cloneDeep(clone)
+        })
       }
     },
     moveComponent(

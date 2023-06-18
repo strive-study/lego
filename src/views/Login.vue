@@ -88,9 +88,14 @@ export default defineComponent({
     })
     const { validate, resetFields } = useForm(form, rules)
     const login = () => {
-      loginFormRef.value?.validate().then(res => {
-        alert('passed')
-      })
+      validate()
+        .then(res => {
+          alert('passed')
+          resetFields()
+        })
+        .catch(e => {
+          console.log(e)
+        })
     }
     return {
       form,

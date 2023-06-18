@@ -1,7 +1,19 @@
 import { ActionContext, Module } from 'vuex'
-import { GlobalDataProps } from '.'
 import axios, { AxiosRequestConfig } from 'axios'
 import { ResData } from './resType'
+import { GlobalDataProps } from './index'
+export const actionWrapper = (
+  url: string,
+  commitName: string,
+  config: AxiosRequestConfig = { method: 'get' }
+) => {
+  return async (context: ActionContext<any, any>, payload?: any) => {
+    const newConfig = { ...config, data: payload, opName: commitName }
+    const { data } = await axios(url, newConfig)
+    context.commit(commitName, data)
+    return data
+  }
+}
 export interface UserDataProps {
   username?: string
   nickName?: string
@@ -19,18 +31,6 @@ export interface UserProps {
   data?: UserDataProps
 }
 
-const actionWrapper = (
-  url: string,
-  commitName: string,
-  config: AxiosRequestConfig = { method: 'get' }
-) => {
-  return async (context: ActionContext<any, any>, payload?: any) => {
-    const newConfig = { ...config, data: payload }
-    const { data } = await axios(url, newConfig)
-    context.commit(commitName, data)
-    return data
-  }
-}
 const user: Module<UserProps, GlobalDataProps> = {
   state: {
     isLogin: false

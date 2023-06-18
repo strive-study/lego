@@ -43,7 +43,12 @@
             </a-input>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" size="large" @click="login">
+            <a-button
+              type="primary"
+              size="large"
+              @click="login"
+              :loading="isLoginLoading"
+            >
               登录
             </a-button>
             <a-button
@@ -81,6 +86,9 @@ export default defineComponent({
   setup() {
     const store = useStore<GlobalDataProps>()
     const router = useRouter()
+    const isLoginLoading = computed(() =>
+      store.getters.isOpLoading('fetchToken')
+    )
     const form = reactive({
       phoneNumber: '',
       veriCode: ''
@@ -158,7 +166,8 @@ export default defineComponent({
       validateInfos,
       isLoading,
       login,
-      getCode
+      getCode,
+      isLoginLoading
     }
   }
 })

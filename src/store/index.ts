@@ -1,9 +1,22 @@
-import { createStore } from 'vuex'
+import { ActionContext, createStore } from 'vuex'
 import templates, { TemplatesProps } from './templates'
 import user, { UserProps } from './user'
 import editor, { EditorProps } from './editor'
 import global, { GlobalStatus } from './global'
-
+import { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
+export const actionWrapper = (
+  url: string,
+  commitName: string,
+  config: AxiosRequestConfig = { method: 'get' }
+) => {
+  return async (context: ActionContext<any, any>, payload?: any) => {
+    const newConfig = { ...config, data: payload, opName: commitName }
+    const { data } = await axios(url, newConfig)
+    context.commit(commitName, data)
+    return data
+  }
+}
 export interface GlobalDataProps {
   user: UserProps
   templates: TemplatesProps

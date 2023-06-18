@@ -1,4 +1,5 @@
 <template>
+  <a-spin v-if="isLoading" class="spin" size="large"></a-spin>
   <div class="login-page">
     <a-row>
       <a-col :span="12" class="aside">
@@ -68,7 +69,7 @@ import axios from 'axios'
 import { message } from 'ant-design-vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-
+import { GlobalDataProps } from '@/store'
 interface RuleFormInstance {
   validate: () => Promise<any>
 }
@@ -78,13 +79,14 @@ export default defineComponent({
     LockOutlined
   },
   setup() {
-    const store = useStore()
+    const store = useStore<GlobalDataProps>()
     const router = useRouter()
     const form = reactive({
       phoneNumber: '',
       veriCode: ''
     })
     let timer: NodeJS.Timer | null = null
+    const isLoading = computed(() => store.getters.isLoading)
     const counter = ref(60)
     const loginFormRef = ref<RuleFormInstance | null>(null)
     const phoneValidator = (rule: Rule, value: string) => {
@@ -154,6 +156,7 @@ export default defineComponent({
       verifyDisabled,
       counter,
       validateInfos,
+      isLoading,
       login,
       getCode
     }
@@ -161,6 +164,12 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+.spin {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+}
 .logo-area {
   position: absolute;
   top: 30px;

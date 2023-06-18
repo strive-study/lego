@@ -16,14 +16,25 @@
         >
           <h2>欢迎回来</h2>
           <p class="subTitle">使用手机号码和验证码登录到Strive乐高</p>
-          <a-form-item label="手机号码" required name="phoneNumber">
+          <a-form-item
+            label="手机号码"
+            required
+            name="phoneNumber"
+            v-bind="validateInfos.phoneNumber"
+          >
             <a-input placeholder="手机号码" v-model:value="form.phoneNumber">
               <template v-slot:prefix
                 ><UserOutlined style="color: rgba(0, 0, 0, 0.25)"
               /></template>
             </a-input>
           </a-form-item>
-          <a-form-item label="验证码" required name="veriCode">
+
+          <a-form-item
+            label="验证码"
+            required
+            name="veriCode"
+            v-bind="validateInfos.veriCode"
+          >
             <a-input placeholder="四位验证码" v-model:value="form.veriCode">
               <template v-slot:prefix
                 ><LockOutlined style="color: rgba(0, 0, 0, 0.25)"
@@ -79,20 +90,18 @@ export default defineComponent({
     const phoneValidator = (rule: Rule, value: string) => {
       return new Promise((resolve, reject) => {
         const passed = /^1[3-9]\d{9}$/.test(value.trim())
-        setTimeout(() => {
-          if (passed) {
-            resolve('')
-          } else {
-            reject('手机号码格式不正确')
-          }
-        }, 500)
+        if (passed) {
+          resolve('')
+        } else {
+          reject('手机号码格式不正确')
+        }
       })
     }
     const rules = reactive({
       phoneNumber: [
         // { required: true, message: '手机号码不能为空', trigger: 'blur' },
         // { pattern: /^1[3-9]\d{9}$/, message: '手机号码格式不正确', trigger: 'blur' }
-        { required: true, asyncValidator: phoneValidator, trigger: 'blur' }
+        { required: true, validator: phoneValidator, trigger: 'blur' }
       ],
       veriCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
     })
@@ -112,7 +121,7 @@ export default defineComponent({
         !/^1[3-9]\d{9}$/.test(form.phoneNumber.trim()) || counter.value < 60
       )
     })
-    const { validate, resetFields } = useForm(form, rules)
+    const { validate, resetFields, validateInfos } = useForm(form, rules)
     const login = () => {
       validate()
         .then(() => {
@@ -144,6 +153,7 @@ export default defineComponent({
       loginFormRef,
       verifyDisabled,
       counter,
+      validateInfos,
       login,
       getCode
     }

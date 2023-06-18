@@ -1,6 +1,6 @@
-import { Module } from 'vuex'
+import { ActionContext, Module } from 'vuex'
 import { GlobalDataProps } from '.'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { ResData } from './resType'
 export interface UserDataProps {
   username?: string
@@ -19,13 +19,24 @@ export interface UserProps {
   data?: UserDataProps
 }
 
+const actionWrapper = (
+  url: string,
+  commitName: string,
+  config: AxiosRequestConfig = { method: 'get' }
+) => {
+  return async (context: ActionContext<any, any>, payload?: any) => {
+    const newConfig = { ...config, data: payload }
+    const { data } = await axios(url, newConfig)
+    context.commit(commitName, data)
+    return data
+  }
+}
 const user: Module<UserProps, GlobalDataProps> = {
   state: {
     isLogin: false
   },
   mutations: {
-    login(state, rawData: ResData<string>) {
-      console.log('------------', rawData)
+    fetchToken(state, rawData: ResData<string>) {
       const { data } = rawData
       state.token = data
       axios.defaults.headers.common.Authorization = `Bearer ${data}`
@@ -41,19 +52,15 @@ const user: Module<UserProps, GlobalDataProps> = {
     // }
   },
   actions: {
-    login({ commit }, payload) {
-      return axios.post('/users/loginByPhoneNumber', payload).then(res => {
-        console.log(res)
-        commit('login', res.data)
-      })
-    },
-    fetchCurrentUser({ commit }) {
-      return axios.get('/users/getUserInfo').then(res => {
-        commit('fetchCurrentUser', res.data)
-      })
-    },
+    // 手机号+验证码获取token==>token
+    fetchToken: actionWrapper('/users/loginByPhoneNumber', 'fetchToken', {
+      method: 'post'
+    }),
+    // 根据token获取用户信息
+    fetchCurrentUser: actionWrapper('/users/getUserInfo', 'fetchCurrentUser'),
+    // 登录并
     loginAndFetch({ dispatch }, loginData) {
-      return dispatch('login', loginData).then(() => {
+      return dispatch('fetchToken', loginData).then(() => {
         return dispatch('fetchCurrentUser')
       })
     }

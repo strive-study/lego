@@ -34,8 +34,13 @@
             <a-button type="primary" size="large" @click="login">
               登录
             </a-button>
-            <a-button size="large" :style="{ marginLeft: '20px' }">
-              获取验证码
+            <a-button
+              size="large"
+              :style="{ marginLeft: '20px' }"
+              :disabled="verifyDisabled"
+              @click="getCode"
+            >
+              {{ counter === 60 ? '获取验证码' : `${counter}秒后重发` }}
             </a-button>
           </a-form-item>
         </a-form>
@@ -44,10 +49,12 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref, Ref } from 'vue'
+import { computed, defineComponent, reactive, ref, watch } from 'vue'
 import { useForm } from 'ant-design-vue/lib/form'
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { Rule } from 'ant-design-vue/es/form/interface'
+import axios from 'axios'
+import { message } from 'ant-design-vue'
 
 interface RuleFormInstance {
   validate: () => Promise<any>
@@ -62,7 +69,8 @@ export default defineComponent({
       phoneNumber: '',
       verifyCode: ''
     })
-
+    let timer: NodeJS.Timer | null = null
+    const counter = ref(60)
     const loginFormRef = ref<RuleFormInstance | null>(null)
     const phoneValidator = (rule: Rule, value: string) => {
       return new Promise((resolve, reject) => {
@@ -78,13 +86,29 @@ export default defineComponent({
     }
     const rules = reactive({
       phoneNumber: [
-        { required: true, message: '手机号码不能为空', trigger: 'blur' },
+        // { required: true, message: '手机号码不能为空', trigger: 'blur' },
         // { pattern: /^1[3-9]\d{9}$/, message: '手机号码格式不正确', trigger: 'blur' }
-        { asyncValidator: phoneValidator, trigger: 'blur' }
+        { required: true, asyncValidator: phoneValidator, trigger: 'blur' }
       ],
       verifyCode: [
         { required: true, message: '验证码不能为空', trigger: 'blur' }
       ]
+    })
+    watch(counter, newVal => {
+      if (newVal === 0) {
+        clearInterval(timer!)
+        counter.value = 60
+      }
+    })
+    const startCounter = () => {
+      timer = setInterval(() => {
+        counter.value--
+      }, 1000)
+    }
+    const verifyDisabled = computed(() => {
+      return (
+        !/^1[3-9]\d{9}$/.test(form.phoneNumber.trim()) || counter.value < 60
+      )
     })
     const { validate, resetFields } = useForm(form, rules)
     const login = () => {
@@ -97,11 +121,25 @@ export default defineComponent({
           console.log(e)
         })
     }
+    const getCode = () => {
+      axios
+        .post('/users/genVeriCode', {
+          phoneNumber: form.phoneNumber
+        })
+        .then(res => {
+          message.success('验证码已发送，请注意查收', 5)
+          startCounter()
+          console.log(res)
+        })
+    }
     return {
       form,
       rules,
       loginFormRef,
-      login
+      verifyDisabled,
+      counter,
+      login,
+      getCode
     }
   }
 })

@@ -6,6 +6,7 @@
     :style="styles"
     ref="editWrapper"
     @mousedown="startMove"
+    :data-component-id="id"
   >
     <slot></slot>
     <div class="resizers">

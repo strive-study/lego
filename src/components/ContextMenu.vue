@@ -4,7 +4,7 @@
       <li
         v-for="(action, index) in actions"
         :key="index"
-        @click="action.action"
+        @click="action.action(componentId)"
         class="ant-menu-item"
       >
         <span class="item-text">{{ action.text }}</span>
@@ -23,9 +23,14 @@ const props = defineProps({
   actions: {
     type: Array as PropType<ActionItem[]>,
     required: true
+  },
+  triggerClass: {
+    type: String,
+    default: 'edit-wrapper'
   }
 })
 const menuRef = ref<HTMLElement | null>(null)
+const componentId = ref('')
 onMounted(() => {
   document.addEventListener('contextmenu', triggerContextMenu)
   document.addEventListener('click', handleClick)
@@ -36,12 +41,19 @@ onUnmounted(() => {
 })
 const triggerContextMenu = (e: MouseEvent) => {
   const domElement = menuRef.value as HTMLElement
-  const wrapperEle = getParentElement(e.target as HTMLElement, 'edit-wrapper')
+  const wrapperEle = getParentElement(
+    e.target as HTMLElement,
+    props.triggerClass
+  )
   if (wrapperEle) {
     e.preventDefault()
     domElement.style.display = 'block'
     domElement.style.top = e.clientY + 'px' //pageY
     domElement.style.left = e.clientX + 'px' //pageX
+    const cid = wrapperEle.dataset.componentId
+    if (cid) {
+      componentId.value = cid
+    }
   }
 }
 const handleClick = () => {

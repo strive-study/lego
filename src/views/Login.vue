@@ -86,6 +86,13 @@ export default defineComponent({
   setup() {
     const store = useStore<GlobalDataProps>()
     const router = useRouter()
+    const error = computed(() => store.state.global.error)
+    watch(
+      () => error.value.status,
+      e => {
+        if (e) message.error(error.value.message || '未知错误', 2)
+      }
+    )
     const isLoginLoading = computed(() =>
       store.getters.isOpLoading('fetchToken')
     )
@@ -133,18 +140,19 @@ export default defineComponent({
     })
     const { validate, resetFields, validateInfos } = useForm(form, rules)
     const login = () => {
-      validate()
-        .then(() => {
-          store.dispatch('loginAndFetch', form).then(() => {
+      validate().then(() => {
+        store
+          .dispatch('loginAndFetch', form)
+          .then(() => {
             message.success('登录成功 2秒后跳转首页')
             setTimeout(() => {
               router.push('/')
             }, 2000)
           })
-        })
-        .catch(e => {
-          console.log(e)
-        })
+          .catch(e => {
+            console.log(e)
+          })
+      })
     }
     const getCode = () => {
       axios

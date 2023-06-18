@@ -1,7 +1,7 @@
-export interface ResData<T> {
-  error: number
+export interface ResData<T = {}> {
+  errno: number
   data: T
-  message: string
+  message?: string
 }
 
 export interface ListData<T> {

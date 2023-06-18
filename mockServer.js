@@ -18,20 +18,20 @@ server.use(bodyParser.json())
 server.use(rewriter)
 server.use(middlewares)
 server.use('/works', (req, res, next) => {
-  const errorRes = {
-    error: '12001',
+  const errnoRes = {
+    errno: '12001',
     message: '登录验证失败'
   }
   const authHeader = req.header.authorization
   if (authHeader == undefined) {
-    res.json(errorRes)
+    res.json(errnoRes)
     return
   }
   try {
     verifyToken(authHeader.split(' ')[1])
     next()
   } catch (e) {
-    res.json(errorRes)
+    res.json(errnoRes)
     return
   }
 })
@@ -45,7 +45,7 @@ server.post('/users/loginByPhoneNumber', (req, res) => {
 })
 router.render = (req, res) => {
   res.jsonp({
-    error: 0,
+    errno: 0,
     data: {
       list: res.locals.data,
       count: res.locals.data.length

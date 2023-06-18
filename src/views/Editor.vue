@@ -75,7 +75,7 @@
 <script lang="ts">
 import { useStore } from 'vuex'
 import { GlobalDataProps } from '@/store'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, onMounted, ref } from 'vue'
 import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
@@ -88,6 +88,7 @@ import PropsTable from '@/components/PropsTable.vue'
 import HistoryArea from './editor/HistoryArea.vue'
 import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
+import createContextMenu from '@/components/createContextMenu'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -105,6 +106,18 @@ export default defineComponent({
   },
   setup() {
     initHotKeys()
+    const testActions = [
+      {
+        shortcut: ' ctrl + z',
+        text: '撤销',
+        action: () => {
+          console.log(1)
+        }
+      }
+    ]
+    onMounted(() => {
+      createContextMenu(testActions)
+    })
     const store = useStore<GlobalDataProps>()
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
@@ -147,6 +160,7 @@ export default defineComponent({
       currentElement,
       activePanel,
       page,
+      testActions,
       handleAddItem,
       handleSetActive,
       handleChange,

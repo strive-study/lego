@@ -72,4 +72,14 @@ export default function initHotKeys() {
       })
     })
   )
+
+  useHotKey('ctrl+z, command+z', () => {
+    const checkUndoDisable = store.getters.checkUndoDisable
+    !checkUndoDisable && store.commit('undo')
+  })
+
+  useHotKey('ctrl+y, command+y', () => {
+    const checkUndoDisable = store.getters.checkRedoDisable
+    !checkUndoDisable && store.commit('redo')
+  })
 }

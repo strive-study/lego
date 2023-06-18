@@ -22,6 +22,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/editor',
     name: 'editor',
     component: () => import('@/views/Editor.vue')
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/Login.vue')
   }
 ]
 

@@ -23,8 +23,8 @@
               /></template>
             </a-input>
           </a-form-item>
-          <a-form-item label="验证码" required name="verifyCode">
-            <a-input placeholder="四位验证码" v-model:value="form.verifyCode">
+          <a-form-item label="验证码" required name="veriCode">
+            <a-input placeholder="四位验证码" v-model:value="form.veriCode">
               <template v-slot:prefix
                 ><LockOutlined style="color: rgba(0, 0, 0, 0.25)"
               /></template>
@@ -55,6 +55,8 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { Rule } from 'ant-design-vue/es/form/interface'
 import axios from 'axios'
 import { message } from 'ant-design-vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 interface RuleFormInstance {
   validate: () => Promise<any>
@@ -65,9 +67,11 @@ export default defineComponent({
     LockOutlined
   },
   setup() {
+    const store = useStore()
+    const router = useRouter()
     const form = reactive({
       phoneNumber: '',
-      verifyCode: ''
+      veriCode: ''
     })
     let timer: NodeJS.Timer | null = null
     const counter = ref(60)
@@ -90,9 +94,7 @@ export default defineComponent({
         // { pattern: /^1[3-9]\d{9}$/, message: '手机号码格式不正确', trigger: 'blur' }
         { required: true, asyncValidator: phoneValidator, trigger: 'blur' }
       ],
-      verifyCode: [
-        { required: true, message: '验证码不能为空', trigger: 'blur' }
-      ]
+      veriCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
     })
     watch(counter, newVal => {
       if (newVal === 0) {
@@ -113,9 +115,13 @@ export default defineComponent({
     const { validate, resetFields } = useForm(form, rules)
     const login = () => {
       validate()
-        .then(res => {
-          alert('passed')
-          resetFields()
+        .then(() => {
+          store.dispatch('loginAndFetch', form).then(() => {
+            message.success('登录成功 2秒后跳转首页')
+            setTimeout(() => {
+              router.push('/')
+            }, 2000)
+          })
         })
         .catch(e => {
           console.log(e)

@@ -61,7 +61,7 @@ describe('UserProfile component', () => {
     expect(wrapper.get('div').text()).toBe('登录')
     await wrapper.get('div').trigger('click')
     expect(message.success).toHaveBeenCalled()
-    expect(store.state.user.username).toBe('xiaoli')
+    expect(store.state.user.data?.username).toBe('xiaoli')
   })
 
   it('should render username when login is true', async () => {

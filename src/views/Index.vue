@@ -2,14 +2,12 @@
   <div class="container">
     <a-layout-header class="header">
       <router-link to="/">
-        <header class="header-title">慕课乐高</header>
+        <header class="header-title">Strive乐高</header>
       </router-link>
       <user-profile :user="user"></user-profile>
     </a-layout-header>
     <router-view></router-view>
-    <a-layout-footer>
-      © 慕课网（imooc.com）版权所有 | 津ICP备20000929号-2
-    </a-layout-footer>
+    <a-layout-footer> Strive乐高 </a-layout-footer>
   </div>
 </template>
 
@@ -20,6 +18,7 @@ import { GlobalDataProps } from '@/store'
 import { computed } from 'vue'
 const store = useStore<GlobalDataProps>()
 const user = computed(() => store.state.user)
+console.log('user', user.value)
 </script>
 
 <style>

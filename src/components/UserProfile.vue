@@ -9,7 +9,7 @@
   </a-button>
   <div v-else>
     <a-dropdown-button class="user-profile-component">
-      <router-link to="/setting">{{ user.username }}</router-link>
+      <router-link to="/setting">{{ user?.data?.nickName }}</router-link>
       <template v-slot:overlay>
         <a-menu class="user-profile-dropdown">
           <a-menu-item key="0" @click="logout">登出</a-menu-item>

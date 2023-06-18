@@ -1,6 +1,7 @@
 import { Module } from 'vuex'
 import { GlobalDataProps } from '.'
-
+import axios from 'axios'
+import { ResListData } from './resType'
 export interface TemplateProps {
   id: number
   title: string
@@ -67,6 +68,19 @@ export interface TemplatesProps {
 const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
     data: templateTestData
+  },
+  actions: {
+    fetchTemplates({ commit }) {
+      return axios.get('/templates').then(res => {
+        commit('fetchTemplates', res.data)
+      })
+    }
+  },
+  mutations: {
+    fetchTemplates(state, rawData: ResListData<TemplateProps>) {
+      state.data = rawData.data.list
+      console.log(rawData)
+    }
   },
   getters: {
     getTemplateById: state => (id: number) => {

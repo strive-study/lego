@@ -7,12 +7,14 @@
 <script lang="ts" setup>
 import { useStore } from 'vuex'
 import TemplateList from '@/components/TemplateList.vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { GlobalDataProps } from '@/store'
 
 const store = useStore<GlobalDataProps>()
 const templateTestData = computed(() => store.state.templates.data)
-// const templateTestData = store.state.templates
+onMounted(() => {
+  store.dispatch('fetchTemplates')
+})
 </script>
 
 <style lang="scss" scoped>

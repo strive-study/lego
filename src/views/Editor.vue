@@ -104,7 +104,7 @@
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { GlobalDataProps } from '@/store'
-import { computed, defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
 import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
@@ -147,10 +147,20 @@ export default defineComponent({
     const page = computed(() => store.state.editor.page)
     const userInfo = computed(() => store.state.user)
     const isSaveLoading = computed(() => store.getters.isOpLoading('saveWork'))
+    const isDirty = computed(() => store.state.editor.isDirty)
+    let timer: any
     onMounted(() => {
       if (currentWorkId) {
         store.dispatch('fetchWork', { urlParams: { id: currentWorkId } })
       }
+      timer = setInterval(() => {
+        if (isDirty.value) {
+          saveWork()
+        }
+      }, 1000 * 60 * 3)
+    })
+    onUnmounted(() => {
+      clearInterval(timer)
     })
     const currentElement = computed<ComponentData | null>(
       () => store.getters.getCurrentElement
@@ -203,6 +213,7 @@ export default defineComponent({
         urlParams: { id: currentWorkId }
       })
     }
+
     return {
       components,
       defaultTextTemplates,

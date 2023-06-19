@@ -1,4 +1,4 @@
-import { ActionContext, Module } from 'vuex'
+import { ActionContext, Module, Mutation } from 'vuex'
 import store, { ActionPayload, GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -16,7 +16,7 @@ import {
 import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
-import { ResData, ResWorkData, WorkData } from './resType'
+import { ResWorkData } from './resType'
 import { compile } from 'path-to-regexp'
 import axios, { AxiosRequestConfig } from 'axios'
 export const actionWrapper = (
@@ -64,6 +64,7 @@ export interface EditorProps {
   historyIndex: number // 记录栈中所处操作记录位置
   cachedOldValues: any // 开始更新时的缓存值
   maxHistoryNumber: number
+  isDirty?: boolean
 }
 export interface PageProps {
   backgroundColor: string
@@ -211,6 +212,12 @@ const pushModifyHistory = (
   state.cachedOldValues = null
 }
 const pushHistoryDebounce = debounceChange(pushModifyHistory)
+const setDirtyWrapper = (callback: Mutation<EditorProps>) => {
+  return (state: EditorProps, payload: any) => {
+    state.isDirty = true
+    callback(state, payload)
+  }
+}
 const editor: Module<EditorProps, GlobalDataProps> = {
   state: {
     components: editorTestComponents,
@@ -222,7 +229,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     histories: [],
     historyIndex: -1,
     cachedOldValues: null,
-    maxHistoryNumber: 5
+    maxHistoryNumber: 5,
+    isDirty: false
   },
   actions: {
     fetchWork: actionWrapper('/works/:id', 'fetchWork'),
@@ -234,7 +242,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       ;(state.currentElementId = ''), (state.histories = [])
       state.historyIndex = -1
     },
-    addComponent(state, component: ComponentData) {
+    addComponent: setDirtyWrapper((state, component: ComponentData) => {
       component.layerName = '图层' + (state.components.length + 1)
       state.components.push(component)
       pushHistory(state, {
@@ -243,8 +251,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         type: 'add',
         data: cloneDeep(component)
       })
-    },
-    deleteComponent(state, id: string) {
+    }),
+    deleteComponent: setDirtyWrapper((state, id: string) => {
       const currentComponent = state.components.find(c => c.id === id)
       if (currentComponent) {
         const currentIndex = state.components.findIndex(c => c.id === id)
@@ -260,7 +268,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         })
         message.success('删除当前图层成功', 1)
       }
-    },
+    }),
     setActive(state, currentElementId: string) {
       state.currentElementId = currentElementId
     },
@@ -318,46 +326,48 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.historyIndex++
     },
     // 防抖更新
-    updateComponent(state, { key, value, id, isRoot }: UpdateComponentData) {
-      const shouldUpdateComponent = state.components.find(
-        c => c.id === (id || state.currentElementId)
-      )
-      if (shouldUpdateComponent) {
-        if (isRoot) {
-          // ts bug issues/31663
-          ;(shouldUpdateComponent as any)[key as string] = value
-        } else {
-          const oldValue = isArray(key)
-            ? key.map(key => shouldUpdateComponent.props[key])
-            : shouldUpdateComponent.props[key]
-          if (!state.cachedOldValues) {
-            state.cachedOldValues = oldValue
-          }
-          pushHistoryDebounce(state, { key, value, id })
-          if (isArray(key) && isArray(value)) {
-            key.forEach((keyName, index) => {
-              shouldUpdateComponent.props[keyName] = value[index]
-            })
-          } else if (typeof key === 'string' && typeof value === 'string') {
-            shouldUpdateComponent.props[key] = value
+    updateComponent: setDirtyWrapper(
+      (state, { key, value, id, isRoot }: UpdateComponentData) => {
+        const shouldUpdateComponent = state.components.find(
+          c => c.id === (id || state.currentElementId)
+        )
+        if (shouldUpdateComponent) {
+          if (isRoot) {
+            // ts bug issues/31663
+            ;(shouldUpdateComponent as any)[key as string] = value
+          } else {
+            const oldValue = isArray(key)
+              ? key.map(key => shouldUpdateComponent.props[key])
+              : shouldUpdateComponent.props[key]
+            if (!state.cachedOldValues) {
+              state.cachedOldValues = oldValue
+            }
+            pushHistoryDebounce(state, { key, value, id })
+            if (isArray(key) && isArray(value)) {
+              key.forEach((keyName, index) => {
+                shouldUpdateComponent.props[keyName] = value[index]
+              })
+            } else if (typeof key === 'string' && typeof value === 'string') {
+              shouldUpdateComponent.props[key] = value
+            }
           }
         }
       }
-    },
-    updatePage(state, { key, value, isRoot }) {
+    ),
+    updatePage: setDirtyWrapper((state, { key, value, isRoot }) => {
       if (isRoot) {
         state.page[key as keyof PageData] = value
       } else {
         state.page.props[key as keyof PageProps] = value
       }
-    },
-    copyComponent(state, id: string) {
+    }),
+    copyComponent: setDirtyWrapper((state, id: string) => {
       const currentComponent = store.getters.getElement(id)
       if (currentComponent) {
         state.copiedComponent = currentComponent
         message.success('已拷贝当前图层', 1)
       }
-    },
+    }),
     pasteCopiedComponent(state) {
       if (state.copiedComponent) {
         const clone = cloneDeep(state.copiedComponent)
@@ -424,8 +434,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       }
       state.components = content.components
     },
-    saveWork(state, { data }: ResData<WorkData>) {
-      console.log('saveWork', data)
+    saveWork(state) {
+      state.isDirty = false
     }
   },
   getters: {

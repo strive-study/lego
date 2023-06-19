@@ -1,19 +1,19 @@
 import { ActionContext, Module } from 'vuex'
 import axios, { AxiosRequestConfig } from 'axios'
 import { ResData } from './resType'
-import { GlobalDataProps } from './index'
-export const actionWrapper = (
-  url: string,
-  commitName: string,
-  config: AxiosRequestConfig = { method: 'get' }
-) => {
-  return async (context: ActionContext<any, any>, payload?: any) => {
-    const newConfig = { ...config, data: payload, opName: commitName }
-    const { data } = await axios(url, newConfig)
-    context.commit(commitName, data)
-    return data
-  }
-}
+import { GlobalDataProps, actionWrapper } from './index'
+// export const actionWrapper = (
+//   url: string,
+//   commitName: string,
+//   config: AxiosRequestConfig = { method: 'get' }
+// ) => {
+//   return async (context: ActionContext<any, any>, payload?: any) => {
+//     const newConfig = { ...config, data: payload, opName: commitName }
+//     const { data } = await axios(url, newConfig)
+//     context.commit(commitName, data)
+//     return data
+//   }
+// }
 export interface UserDataProps {
   username?: string
   nickName?: string

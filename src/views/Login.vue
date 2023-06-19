@@ -134,7 +134,7 @@ export default defineComponent({
     const login = () => {
       validate().then(() => {
         store
-          .dispatch('loginAndFetch', form)
+          .dispatch('loginAndFetch', { data: form })
           .then(() => {
             message.success('登录成功 2秒后跳转首页')
             setTimeout(() => {

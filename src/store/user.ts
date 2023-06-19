@@ -1,18 +1,29 @@
 import { ActionContext, Module } from 'vuex'
 import axios, { AxiosRequestConfig } from 'axios'
 import { ResData } from './resType'
-import { GlobalDataProps } from './index'
+import { ActionPayload, GlobalDataProps } from './index'
 import router from '@/router'
+import { compile } from 'path-to-regexp'
+
 export const actionWrapper = (
   url: string,
   commitName: string,
   config: AxiosRequestConfig = { method: 'get' }
 ) => {
-  return async (context: ActionContext<any, any>, payload?: any) => {
-    const newConfig = { ...config, data: payload, opName: commitName }
-    const { data } = await axios(url, newConfig)
-    context.commit(commitName, data)
-    return data
+  return async (
+    context: ActionContext<any, any>,
+    payload: ActionPayload = {}
+  ) => {
+    const { urlParams, data } = payload
+    const newConfig = { ...config, data, opName: commitName }
+    let newURL = url
+    if (urlParams) {
+      const toPath = compile(url, { encode: encodeURIComponent })
+      newURL = toPath(urlParams)
+    }
+    const res = await axios(newURL, newConfig)
+    context.commit(commitName, res.data)
+    return res.data
   }
 }
 export interface UserDataProps {
@@ -60,7 +71,9 @@ const user: Module<UserProps, GlobalDataProps> = {
   actions: {
     // 手机号+验证码获取token==>token
     fetchToken: actionWrapper('/users/loginByPhoneNumber', 'fetchToken', {
-      method: 'post'
+      data: {
+        method: 'post'
+      }
     }),
     // 根据token获取用户信息
     fetchCurrentUser: actionWrapper('/users/getUserInfo', 'fetchCurrentUser'),

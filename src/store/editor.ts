@@ -1,5 +1,5 @@
-import { Module } from 'vuex'
-import store, { GlobalDataProps } from '.'
+import { ActionContext, Module } from 'vuex'
+import store, { ActionPayload, GlobalDataProps } from '.'
 import { v4 as uuidv4 } from 'uuid'
 import {
   // AllComponentProps,
@@ -16,6 +16,29 @@ import {
 import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
+import { compile } from 'path-to-regexp'
+import axios, { AxiosRequestConfig } from 'axios'
+export const actionWrapper = (
+  url: string,
+  commitName: string,
+  config: AxiosRequestConfig = { method: 'get' }
+) => {
+  return async (
+    context: ActionContext<any, any>,
+    payload: ActionPayload = {}
+  ) => {
+    const { urlParams, data } = payload
+    const newConfig = { ...config, data, opName: commitName }
+    let newURL = url
+    if (urlParams) {
+      const toPath = compile(url, { encode: encodeURIComponent })
+      newURL = toPath(urlParams)
+    }
+    const res = await axios(newURL, newConfig)
+    context.commit(commitName, res.data)
+    return res.data
+  }
+}
 export interface HistoryProps {
   id: string
   componentId: string
@@ -194,6 +217,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     historyIndex: -1,
     cachedOldValues: null,
     maxHistoryNumber: 5
+  },
+  actions: {
+    fetchWork: actionWrapper('/works/:id', 'fetchWork')
   },
   mutations: {
     resetEditor(state) {

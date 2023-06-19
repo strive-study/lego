@@ -29,7 +29,7 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   {
-    path: '/editor',
+    path: '/editor/:id',
     name: 'editor',
     component: () => import('@/views/Editor.vue'),
     meta: {

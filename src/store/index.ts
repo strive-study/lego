@@ -5,16 +5,30 @@ import editor, { EditorProps } from './editor'
 import global, { GlobalStatus } from './global'
 import { AxiosRequestConfig } from 'axios'
 import axios from 'axios'
+import { compile } from 'path-to-regexp'
+export interface ActionPayload {
+  urlParams?: { [key: string]: any }
+  data?: any
+}
 export const actionWrapper = (
   url: string,
   commitName: string,
   config: AxiosRequestConfig = { method: 'get' }
 ) => {
-  return async (context: ActionContext<any, any>, payload?: any) => {
-    const newConfig = { ...config, data: payload, opName: commitName }
-    const { data } = await axios(url, newConfig)
-    context.commit(commitName, data)
-    return data
+  return async (
+    context: ActionContext<any, any>,
+    payload: ActionPayload = {}
+  ) => {
+    const { urlParams, data } = payload
+    const newConfig = { ...config, data, opName: commitName }
+    let newURL = url
+    if (urlParams) {
+      const toPath = compile(url, { encode: encodeURIComponent })
+      newURL = toPath(urlParams)
+    }
+    const res = await axios(newURL, newConfig)
+    context.commit(commitName, res.data)
+    return res.data
   }
 }
 export interface GlobalDataProps {

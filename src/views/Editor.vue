@@ -74,6 +74,7 @@
 
 <script lang="ts">
 import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import { GlobalDataProps } from '@/store'
 import { computed, defineComponent, onMounted, ref } from 'vue'
 import LText from '@/components/LText.vue'
@@ -107,10 +108,16 @@ export default defineComponent({
   setup() {
     initContextMenu()
     initHotKeys()
+    const route = useRoute()
     const store = useStore<GlobalDataProps>()
+    const currentWorkId = route.params.id
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
-
+    onMounted(() => {
+      if (currentWorkId) {
+        store.dispatch('fetchWork', { urlParams: { id: currentWorkId } })
+      }
+    })
     const currentElement = computed<ComponentData | null>(
       () => store.getters.getCurrentElement
     )

@@ -16,7 +16,7 @@ import {
 import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
-import { ResWorkData } from './resType'
+import { ResData, ResWorkData, WorkData } from './resType'
 import { compile } from 'path-to-regexp'
 import axios, { AxiosRequestConfig } from 'axios'
 export const actionWrapper = (
@@ -36,6 +36,7 @@ export const actionWrapper = (
       newURL = toPath(urlParams)
     }
     const res = await axios(newURL, newConfig)
+    console.log('mutation结果', res)
     context.commit(commitName, res.data)
     return res.data
   }
@@ -224,7 +225,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     maxHistoryNumber: 5
   },
   actions: {
-    fetchWork: actionWrapper('/works/:id', 'fetchWork')
+    fetchWork: actionWrapper('/works/:id', 'fetchWork'),
+    saveWork: actionWrapper('/works/:id', 'saveWork', { method: 'patch' })
   },
   mutations: {
     resetEditor(state) {
@@ -342,8 +344,12 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         }
       }
     },
-    updatePage(state, { key, value }) {
-      state.page.props[key as keyof PageProps] = value
+    updatePage(state, { key, value, isRoot }) {
+      if (isRoot) {
+        state.page[key as keyof PageData] = value
+      } else {
+        state.page.props[key as keyof PageProps] = value
+      }
     },
     copyComponent(state, id: string) {
       const currentComponent = store.getters.getElement(id)
@@ -417,6 +423,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         state.page.props = content.props
       }
       state.components = content.components
+    },
+    saveWork(state, { data }: ResData<WorkData>) {
+      console.log('saveWork', data)
     }
   },
   getters: {

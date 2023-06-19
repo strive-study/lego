@@ -70,9 +70,12 @@ useKeyPress('Escape', () => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .inline-edit {
   cursor: pointer;
+  input {
+    outline: none;
+  }
 }
 .input-error {
   border: 1px solid #f5222d;

@@ -1,74 +1,102 @@
 <template>
   <div class="container">
-    <a-layout-content>
-      <a-layout>
-        <!-- left -->
-        <a-layout-sider width="300" style="background: #fff">
-          组件列表
-          <components-list
-            :list="defaultTextTemplates"
-            @on-item-click="handleAddItem"
-          ></components-list>
-        </a-layout-sider>
-        <!-- 画布区域 -->
-        <a-layout style="padding: 0 24px 24px">
-          <a-layout-content class="preview-container">
-            <p>画布区域</p>
-            <history-area></history-area>
-            <div class="preview-list" id="canvas-area">
-              <div class="body-container" :style="page.props">
-                <edit-wrapper
-                  v-for="c in components"
-                  :key="c.id"
-                  :id="c.id"
-                  :hidden="c.isHidden"
-                  :is-active="c.id === currentElement?.id"
-                  :props="c.props"
-                  @update-position="updatePosition"
-                  @set-active="handleSetActive"
-                >
-                  <component v-bind="c.props" :is="c.name" class="item" />
-                </edit-wrapper>
+    <a-layout>
+      <a-layout-header class="header">
+        <div class="page-title">
+          <router-link to="/">
+            <img
+              alt="乐高编辑器"
+              src="../assets/logo-simple.png"
+              class="logo-img"
+            />
+          </router-link>
+          <inline-edit :value="page.title" @change="titleChange" />
+        </div>
+        <a-menu :selectable="false" theme="dark" mode="horizontal">
+          <a-menu-item key="1">
+            <a-button type="primary">预览和设置</a-button>
+          </a-menu-item>
+          <a-menu-item key="2">
+            <a-button type="primary" @click="saveWork" :loading="isSaveLoading"
+              >保存</a-button
+            >
+          </a-menu-item>
+          <a-menu-item key="3">
+            <a-button type="primary">发布</a-button>
+          </a-menu-item>
+          <a-menu-item key="4">
+            <user-profile :user="userInfo"></user-profile>
+          </a-menu-item>
+        </a-menu>
+      </a-layout-header>
+    </a-layout>
+    <a-layout>
+      <!-- left -->
+      <a-layout-sider width="300" style="background: #fff">
+        组件列表
+        <components-list
+          :list="defaultTextTemplates"
+          @on-item-click="handleAddItem"
+        ></components-list>
+      </a-layout-sider>
+      <!-- 画布区域 -->
+      <a-layout style="padding: 0 24px 24px">
+        <a-layout-content class="preview-container">
+          <p>画布区域</p>
+          <history-area></history-area>
+          <div class="preview-list" id="canvas-area">
+            <div class="body-container" :style="page.props">
+              <edit-wrapper
+                v-for="c in components"
+                :key="c.id"
+                :id="c.id"
+                :hidden="c.isHidden"
+                :is-active="c.id === currentElement?.id"
+                :props="c.props"
+                @update-position="updatePosition"
+                @set-active="handleSetActive"
+              >
+                <component v-bind="c.props" :is="c.name" class="item" />
+              </edit-wrapper>
+            </div>
+          </div>
+        </a-layout-content>
+      </a-layout>
+      <!-- right -->
+      <a-layout-sider width="300" style="background: #fff">
+        <a-tabs type="card" v-model:activeKey="activePanel">
+          <a-tab-pane key="component" tab="属性设置" class="no-top-radius">
+            <div v-if="currentElement">
+              <edit-group
+                v-if="!currentElement.isLocked"
+                :props="currentElement.props"
+                @change="handleChange"
+              ></edit-group>
+              <div v-else>
+                <a-empty>
+                  <template #description>
+                    <p>该元素被锁定，无法编辑</p>
+                  </template>
+                </a-empty>
               </div>
             </div>
-          </a-layout-content>
-        </a-layout>
-        <!-- right -->
-        <a-layout-sider width="300" style="background: #fff">
-          <a-tabs type="card" v-model:activeKey="activePanel">
-            <a-tab-pane key="component" tab="属性设置" class="no-top-radius">
-              <div v-if="currentElement">
-                <edit-group
-                  v-if="!currentElement.isLocked"
-                  :props="currentElement.props"
-                  @change="handleChange"
-                ></edit-group>
-                <div v-else>
-                  <a-empty>
-                    <template #description>
-                      <p>该元素被锁定，无法编辑</p>
-                    </template>
-                  </a-empty>
-                </div>
-              </div>
-            </a-tab-pane>
-            <a-tab-pane key="layer" tab="图层设置">
-              <layer-list
-                :list="components"
-                :selected-id="currentElement?.id!"
-                @select="handleSetActive"
-                @change="handleChange"
-              >
-              </layer-list>
-            </a-tab-pane>
-            <a-tab-pane key="page" tab="页面设置">
-              <props-table :props="page.props" @change="pageChange">
-              </props-table>
-            </a-tab-pane>
-          </a-tabs>
-        </a-layout-sider>
-      </a-layout>
-    </a-layout-content>
+          </a-tab-pane>
+          <a-tab-pane key="layer" tab="图层设置">
+            <layer-list
+              :list="components"
+              :selected-id="currentElement?.id!"
+              @select="handleSetActive"
+              @change="handleChange"
+            >
+            </layer-list>
+          </a-tab-pane>
+          <a-tab-pane key="page" tab="页面设置">
+            <props-table :props="page.props" @change="pageChange">
+            </props-table>
+          </a-tab-pane>
+        </a-tabs>
+      </a-layout-sider>
+    </a-layout>
   </div>
 </template>
 
@@ -87,6 +115,8 @@ import LayerList from '@/components/LayerList.vue'
 import EditGroup from '@/components/EditGroup.vue'
 import PropsTable from '@/components/PropsTable.vue'
 import HistoryArea from './editor/HistoryArea.vue'
+import InlineEdit from '@/components/InlineEdit.vue'
+import UserProfile from '@/components/UserProfile.vue'
 import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 import initContextMenu from '@/plugins/contextMenu'
@@ -103,7 +133,9 @@ export default defineComponent({
     'layer-list': LayerList,
     'edit-group': EditGroup,
     'props-table': PropsTable,
-    'history-area': HistoryArea
+    'history-area': HistoryArea,
+    'inline-edit': InlineEdit,
+    'user-profile': UserProfile
   },
   setup() {
     initContextMenu()
@@ -113,6 +145,8 @@ export default defineComponent({
     const currentWorkId = route.params.id
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
+    const userInfo = computed(() => store.state.user)
+    const isSaveLoading = computed(() => store.getters.isOpLoading('saveWork'))
     onMounted(() => {
       if (currentWorkId) {
         store.dispatch('fetchWork', { urlParams: { id: currentWorkId } })
@@ -150,17 +184,40 @@ export default defineComponent({
       const valueArr = Object.values(updateData).map(v => v + 'px')
       store.commit('updateComponent', { key: keysArr, value: valueArr, id })
     }
+
+    const titleChange = (title: string) => {
+      store.commit('updatePage', { key: 'title', value: title, isRoot: true })
+    }
+
+    const saveWork = () => {
+      const { title, props } = page.value
+      const payload = {
+        title,
+        content: {
+          components: components.value,
+          props
+        }
+      }
+      store.dispatch('saveWork', {
+        data: payload,
+        urlParams: { id: currentWorkId }
+      })
+    }
     return {
       components,
       defaultTextTemplates,
       currentElement,
       activePanel,
       page,
+      userInfo,
+      isSaveLoading,
       handleAddItem,
       handleSetActive,
       handleChange,
       pageChange,
-      updatePosition
+      updatePosition,
+      titleChange,
+      saveWork
     }
   }
 })
@@ -168,6 +225,25 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .container {
+  .header {
+    line-height: 22px;
+    .page-title {
+      display: flex;
+      align-items: center;
+    }
+    .inline-edit {
+      ::v-deep span {
+        font-weight: 500;
+        margin-left: 10px;
+        font-size: 16px;
+        color: #fff;
+      }
+    }
+    ::v-deep .ant-menu-item:hover {
+      background-color: transparent;
+    }
+  }
+
   .preview-container {
     padding: 24px;
     margin: 0;

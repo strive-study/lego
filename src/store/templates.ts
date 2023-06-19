@@ -67,7 +67,7 @@ export interface TemplatesProps {
 
 const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
-    data: templateTestData
+    data: []
   },
   actions: {
     fetchTemplates({ commit }) {

@@ -16,6 +16,7 @@ import {
 import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
+import { ResWorkData } from './resType'
 import { compile } from 'path-to-regexp'
 import axios, { AxiosRequestConfig } from 'axios'
 export const actionWrapper = (
@@ -75,6 +76,10 @@ export interface PageProps {
 export interface PageData {
   props: PageProps
   title: string
+  // ----
+  id?: string
+  desc?: string
+  coverImg?: string
 }
 export type AllFormProps = PageProps & AllComponentProps
 export const editorTestComponents: ComponentData[] = [
@@ -404,6 +409,14 @@ const editor: Module<EditorProps, GlobalDataProps> = {
             break
         }
       }
+    },
+    fetchWork(state, { data }: ResWorkData) {
+      const { content, ...rest } = data
+      state.page = { ...state.page, ...rest }
+      if (content.props) {
+        state.page.props = content.props
+      }
+      state.components = content.components
     }
   },
   getters: {

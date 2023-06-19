@@ -71,6 +71,7 @@ router.beforeEach(async to => {
       } catch (error) {
         message.error('登录状态已过期，请重新登录', 2)
         store.commit('logout')
+        return '/login'
       }
     } else {
       if (requiredLogin) {

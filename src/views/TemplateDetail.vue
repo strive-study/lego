@@ -21,7 +21,7 @@
           <div ref="container"></div>
         </div>
         <div class="btn-wrapper">
-          <router-link to="/editor">
+          <router-link :to="`/editor/${template.id}`">
             <a-button type="primary" size="large" shape="round" class="btn">
               使用模版
             </a-button>

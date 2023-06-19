@@ -57,7 +57,6 @@ const user: Module<UserProps, GlobalDataProps> = {
     },
     fetchCurrentUser(state, rawData: ResData<UserDataProps>) {
       state.isLogin = true
-      console.log('rawData', rawData)
       state.data = rawData.data
     },
     logout(state) {
@@ -65,15 +64,12 @@ const user: Module<UserProps, GlobalDataProps> = {
       state.token = ''
       localStorage.removeItem('token')
       delete axios.defaults.headers.common.Authorization
-      router.push('/login')
     }
   },
   actions: {
     // 手机号+验证码获取token==>token
     fetchToken: actionWrapper('/users/loginByPhoneNumber', 'fetchToken', {
-      data: {
-        method: 'post'
-      }
+      method: 'post'
     }),
     // 根据token获取用户信息
     fetchCurrentUser: actionWrapper('/users/getUserInfo', 'fetchCurrentUser'),

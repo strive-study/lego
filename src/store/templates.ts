@@ -79,7 +79,6 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
   mutations: {
     fetchTemplates(state, rawData: ResListData<TemplateProps>) {
       state.data = rawData.data.list
-      console.log(rawData)
     }
   },
   getters: {

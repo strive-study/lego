@@ -2,6 +2,7 @@ import { ActionContext, Module } from 'vuex'
 import axios, { AxiosRequestConfig } from 'axios'
 import { ResData } from './resType'
 import { GlobalDataProps } from './index'
+import router from '@/router'
 export const actionWrapper = (
   url: string,
   commitName: string,
@@ -28,28 +29,33 @@ export interface UserDataProps {
 export interface UserProps {
   isLogin: boolean
   token?: string
-  data?: UserDataProps
+  data?: UserDataProps // 用户信息
 }
 
 const user: Module<UserProps, GlobalDataProps> = {
   state: {
-    isLogin: false
+    isLogin: false,
+    token: localStorage.getItem('token') || ''
   },
   mutations: {
     fetchToken(state, rawData: ResData<string>) {
       const { data } = rawData
       state.token = data
+      localStorage.setItem('token', data)
       axios.defaults.headers.common.Authorization = `Bearer ${data}`
     },
     fetchCurrentUser(state, rawData: ResData<UserDataProps>) {
       state.isLogin = true
       console.log('rawData', rawData)
       state.data = rawData.data
+    },
+    logout(state) {
+      state.isLogin = false
+      state.token = ''
+      localStorage.removeItem('token')
+      delete axios.defaults.headers.common.Authorization
+      router.push('/login')
     }
-    // logout(state) {
-    //   state.isLogin = false
-    //   state.username = ''
-    // }
   },
   actions: {
     // 手机号+验证码获取token==>token

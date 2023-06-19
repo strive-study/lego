@@ -1,5 +1,4 @@
 <template>
-  <a-spin v-if="isLoading" class="spin" size="large"></a-spin>
   <div class="login-page">
     <a-row>
       <a-col :span="12" class="aside">
@@ -86,24 +85,27 @@ export default defineComponent({
   setup() {
     const store = useStore<GlobalDataProps>()
     const router = useRouter()
-    const error = computed(() => store.state.global.error)
-    watch(
-      () => error.value.status,
-      e => {
-        if (e) message.error(error.value.message || '未知错误', 2)
-      }
-    )
-    const isLoginLoading = computed(() =>
-      store.getters.isOpLoading('fetchToken')
-    )
     const form = reactive({
       phoneNumber: '',
       veriCode: ''
     })
     let timer: NodeJS.Timer | null = null
-    const isLoading = computed(() => store.getters.isLoading)
     const counter = ref(60)
     const loginFormRef = ref<RuleFormInstance | null>(null)
+    const isLoginLoading = computed(() =>
+      store.getters.isOpLoading('fetchToken')
+    )
+    const verifyDisabled = computed(() => {
+      return (
+        !/^1[3-9]\d{9}$/.test(form.phoneNumber.trim()) || counter.value < 60
+      )
+    })
+    watch(counter, newVal => {
+      if (newVal === 0) {
+        clearInterval(timer!)
+        counter.value = 60
+      }
+    })
     const phoneValidator = (rule: Rule, value: string) => {
       return new Promise((resolve, reject) => {
         const passed = /^1[3-9]\d{9}$/.test(value.trim())
@@ -122,23 +124,13 @@ export default defineComponent({
       ],
       veriCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
     })
-    watch(counter, newVal => {
-      if (newVal === 0) {
-        clearInterval(timer!)
-        counter.value = 60
-      }
-    })
+
     const startCounter = () => {
       timer = setInterval(() => {
         counter.value--
       }, 1000)
     }
-    const verifyDisabled = computed(() => {
-      return (
-        !/^1[3-9]\d{9}$/.test(form.phoneNumber.trim()) || counter.value < 60
-      )
-    })
-    const { validate, resetFields, validateInfos } = useForm(form, rules)
+    const { validate, validateInfos } = useForm(form, rules)
     const login = () => {
       validate().then(() => {
         store
@@ -164,6 +156,9 @@ export default defineComponent({
           startCounter()
           console.log(res)
         })
+        .catch(e => {
+          console.log(e)
+        })
     }
     return {
       form,
@@ -172,10 +167,9 @@ export default defineComponent({
       verifyDisabled,
       counter,
       validateInfos,
-      isLoading,
+      isLoginLoading,
       login,
-      getCode,
-      isLoginLoading
+      getCode
     }
   }
 })

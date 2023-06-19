@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import Antd from 'ant-design-vue'
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import router from './router'
 import store from './store'
 import App from './App.vue'
@@ -25,16 +25,19 @@ axios.interceptors.response.use(
     const newConfig = config as _AxiosRequestConfig
     store.commit('finishLoading', { opName: newConfig.opName })
     const { errno, message } = data
-    console.log(data)
     if (errno !== 0) {
       store.commit('setError', { status: true, message })
       return Promise.reject(data)
     }
     return res
   },
-  e => {
-    store.commit('setError', { status: true, message: '服务器错误' })
-    store.commit('finishLoading')
+  (e: AxiosError) => {
+    const newConfig = e.config as _AxiosRequestConfig
+    store.commit('setError', {
+      status: true,
+      message: e.message || '服务器错误'
+    })
+    store.commit('finishLoading', { opName: newConfig.opName })
     return Promise.reject(e)
   }
 )

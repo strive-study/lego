@@ -39,10 +39,9 @@ import { computed, defineComponent, ref, watch, nextTick } from 'vue'
 import StyledUploader from './StyledUploader.vue'
 import { DeleteOutlined, ScissorOutlined } from '@ant-design/icons-vue'
 import { commonUploadCheck } from '../helper'
-import { UploadResp } from '@/extraType'
+import { UploadRes } from '@/extraType'
 import Cropper from 'cropperjs'
-import axios from 'axios'
-import { token } from '@/testToken'
+
 interface CropDataProps {
   x: number
   y: number
@@ -103,8 +102,8 @@ export default defineComponent({
       }
       showModal.value = false
     }
-    const handleUploadSuccess = (data: { res: UploadResp; file: File }) => {
-      emit('change', data.res.data.urls[0])
+    const handleUploadSuccess = (data: UploadRes) => {
+      emit('change', data.data.urls[0])
     }
     const handleDelete = () => {
       emit('change', '')

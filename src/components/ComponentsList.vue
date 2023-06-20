@@ -18,10 +18,11 @@ import StyledUploader from './StyledUploader.vue'
 import { ComponentData } from 'strive-lego-bricks'
 import { v4 as uuidv4 } from 'uuid'
 import { message } from 'ant-design-vue'
-import { UploadResp } from '../extraType'
+import { UploadRes } from '../extraType'
 import { imageDefaultProps } from '@/defaultProps'
 import { getImageDimention } from '../helper'
-const props = defineProps({
+
+defineProps({
   list: {
     type: Array,
     required: true
@@ -38,7 +39,7 @@ const onItemClick = (props: any) => {
   componentData.props.isEditing = true
   emits('on-item-click', componentData)
 }
-const onImageUploaded = (res: UploadResp) => {
+const onImageUploaded = (res: UploadRes) => {
   const componentData: ComponentData = {
     name: 'l-image',
     id: uuidv4(),

@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { PropType, computed, defineComponent, reactive, ref } from 'vue'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import {
   DeleteOutlined,
   LoadingOutlined,
@@ -60,7 +60,8 @@ import {
 } from '@ant-design/icons-vue'
 import { v4 as uuidv4 } from 'uuid'
 import { last } from 'lodash-es'
-import { token } from '@/testToken'
+import { useStore } from 'vuex'
+import { UploadRes } from '@/extraType'
 
 type FileListType = 'picture' | 'text'
 type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
@@ -107,7 +108,10 @@ export default defineComponent({
   },
   emits: ['success', 'error', 'change'],
   setup(props, { emit }) {
-    const Authorization = `Bearer ${token}`
+    const store = useStore()
+
+    const token = computed(() => store.state.user.token)
+    const Authorization = `Bearer ${token.value}`
     const inputRef = ref<null | HTMLInputElement>()
     // 上传过/正在上传 文件列表
     const filesList = ref<UploadFile[]>([])
@@ -201,11 +205,11 @@ export default defineComponent({
             // console.log(progressEvent)
           }
         })
-        .then(res => {
+        .then(({ data }: AxiosResponse<UploadRes>) => {
           readyFile.status = 'success'
-          readyFile.resp = res.data
+          readyFile.resp = data
           emit('success', {
-            res: res.data,
+            res: data,
             file: readyFile,
             list: filesList.value
           })

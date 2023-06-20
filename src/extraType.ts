@@ -1,7 +1,3 @@
-export interface UploadResp {
-  error: number
-  data: {
-    urls: string[]
-  }
-  message: string
-}
+import { ResData } from './store/resType'
+
+export type UploadRes = ResData<{ urls: string[] }>

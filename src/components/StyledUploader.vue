@@ -30,7 +30,6 @@
 </template>
 
 <script lang="ts" setup>
-import {} from 'vue'
 import Uploader from './Uploader.vue'
 import {
   LoadingOutlined,
@@ -38,10 +37,11 @@ import {
   FileImageOutlined
 } from '@ant-design/icons-vue'
 import { commonUploadCheck } from '../helper'
+import { UploadRes } from '@/extraType'
 
 const emits = defineEmits(['success'])
 
-const handleUploadSuccess = (res: any) => {
+const handleUploadSuccess = (res: UploadRes) => {
   emits('success', res)
 }
 </script>

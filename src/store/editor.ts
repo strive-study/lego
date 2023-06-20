@@ -36,7 +36,6 @@ export const actionWrapper = (
       newURL = toPath(urlParams)
     }
     const res = await axios(newURL, newConfig)
-    console.log('mutation结果', res)
     context.commit(commitName, res.data)
     return res.data
   }

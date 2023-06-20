@@ -10,11 +10,11 @@ export interface ActionPayload {
   urlParams?: { [key: string]: any }
   data?: any
 }
-export const actionWrapper = (
+export function actionWrapper(
   url: string,
   commitName: string,
   config: AxiosRequestConfig = { method: 'get' }
-) => {
+) {
   return async (
     context: ActionContext<any, any>,
     payload: ActionPayload = {}

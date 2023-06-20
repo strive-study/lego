@@ -1,31 +1,8 @@
-import { ActionContext, Module } from 'vuex'
-import axios, { AxiosRequestConfig } from 'axios'
+import { Module } from 'vuex'
+import axios from 'axios'
 import { ResData } from './resType'
-import { ActionPayload, GlobalDataProps } from './index'
-import router from '@/router'
-import { compile } from 'path-to-regexp'
+import { GlobalDataProps, actionWrapper } from './index'
 
-export const actionWrapper = (
-  url: string,
-  commitName: string,
-  config: AxiosRequestConfig = { method: 'get' }
-) => {
-  return async (
-    context: ActionContext<any, any>,
-    payload: ActionPayload = {}
-  ) => {
-    const { urlParams, data } = payload
-    const newConfig = { ...config, data, opName: commitName }
-    let newURL = url
-    if (urlParams) {
-      const toPath = compile(url, { encode: encodeURIComponent })
-      newURL = toPath(urlParams)
-    }
-    const res = await axios(newURL, newConfig)
-    context.commit(commitName, res.data)
-    return res.data
-  }
-}
 export interface UserDataProps {
   username?: string
   nickName?: string

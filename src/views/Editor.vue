@@ -22,7 +22,9 @@
             >
           </a-menu-item>
           <a-menu-item key="3">
-            <a-button type="primary" @click="publish">发布</a-button>
+            <a-button type="primary" @click="publish" :loading="isPublishing"
+              >发布</a-button
+            >
           </a-menu-item>
           <a-menu-item key="4">
             <user-profile :user="userInfo"></user-profile>
@@ -158,12 +160,14 @@ export default defineComponent({
     const route = useRoute()
     const store = useStore<GlobalDataProps>()
     const currentWorkId = route.params.id
+    const canvasFix = ref(false)
+    const isPublishing = ref(false)
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
     const userInfo = computed(() => store.state.user)
     const isSaveLoading = computed(() => store.getters.isOpLoading('saveWork'))
     const isDirty = computed(() => store.state.editor.isDirty)
-    const canvasFix = ref(false)
+    const channels = computed(() => store.state.editor.channels)
     let timer: any
     onMounted(() => {
       if (currentWorkId) {
@@ -217,9 +221,10 @@ export default defineComponent({
     }
 
     const saveWork = () => {
-      const { title, props } = page.value
+      const { title, props, coverImg } = page.value
       const payload = {
         title,
+        coverImg,
         content: {
           components: components.value,
           props
@@ -258,20 +263,47 @@ export default defineComponent({
     }
 
     const publish = async () => {
+      isPublishing.value = true
       // 置空选中
       store.commit('setActive', '')
       const el = document.getElementById('canvas-area') as HTMLElement
       canvasFix.value = true
       await nextTick()
-      const res = await screenshotAndUpload(el)
-      if (res) {
-        console.log('resss', res.data.urls)
+      try {
+        // 截图上传后端
+        const res = await screenshotAndUpload(el)
+        if (res) {
+          // 更新coverImage
+          store.commit('updatePage', {
+            key: 'coverImg',
+            value: res.data.urls[0],
+            isRoot: true
+          })
+          // 保存作品
+          await saveWork()
+          // 发布
+          await store.dispatch('publishWork', {
+            urlParams: { id: currentWorkId }
+          })
+          // 判断是否有渠道,如果没有渠道,创建一个默认渠道
+          await store.dispatch('fetchChannel', {
+            urlParams: { id: currentWorkId }
+          })
+          if (channels.value.length === 0) {
+            await store.dispatch('createChannel', {
+              data: {
+                name: '默认',
+                workId: parseInt(currentWorkId as string)
+              }
+            })
+          }
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        isPublishing.value = false
+        canvasFix.value = false
       }
-      canvasFix.value = false
-      // html2canvas(el, { width: 375, useCORS: true, scale: 1 }).then(canvas => {
-      //   const image = document.getElementById('test') as HTMLImageElement
-      //   image.src = canvas.toDataURL()
-      // })
     }
     return {
       components,
@@ -282,6 +314,7 @@ export default defineComponent({
       userInfo,
       isSaveLoading,
       canvasFix,
+      isPublishing,
       handleAddItem,
       handleSetActive,
       handleChange,

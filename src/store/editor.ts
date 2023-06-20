@@ -16,7 +16,7 @@ import {
 import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
-import { ResWorkData } from './resType'
+import { ResData, ResListData, ResWorkData } from './resType'
 
 export interface HistoryProps {
   id: string
@@ -32,6 +32,10 @@ export interface UpdateComponentData {
   isRoot?: boolean
 }
 export type MoveDirection = 'Up' | 'Down' | 'Left' | 'Right'
+export interface ChannelProps {
+  id: number
+  name: string
+}
 export interface EditorProps {
   components: ComponentData[]
   currentElementId: string
@@ -42,6 +46,7 @@ export interface EditorProps {
   cachedOldValues: any // 开始更新时的缓存值
   maxHistoryNumber: number
   isDirty?: boolean
+  channels: ChannelProps[]
 }
 export interface PageProps {
   backgroundColor: string
@@ -207,11 +212,19 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     historyIndex: -1,
     cachedOldValues: null,
     maxHistoryNumber: 5,
-    isDirty: false
+    isDirty: false,
+    channels: []
   },
   actions: {
     fetchWork: actionWrapper('/works/:id', 'fetchWork'),
-    saveWork: actionWrapper('/works/:id', 'saveWork', { method: 'patch' })
+    saveWork: actionWrapper('/works/:id', 'saveWork', { method: 'patch' }),
+    publishWork: actionWrapper('/works/publish/:id', 'publishWork', {
+      method: 'post'
+    }),
+    fetchChannel: actionWrapper('/channels/:id', 'fetchChannel'),
+    createChannel: actionWrapper('/channels', 'createChannel', {
+      method: 'post'
+    })
   },
   mutations: {
     resetEditor(state) {
@@ -413,6 +426,12 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     },
     saveWork(state) {
       state.isDirty = false
+    },
+    fetchChannel(state, { data }: ResListData<ChannelProps>) {
+      state.channels = data.list
+    },
+    createChannel(state, { data }: ResData<ChannelProps>) {
+      state.channels.push(data)
     }
   },
   getters: {

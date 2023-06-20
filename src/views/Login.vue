@@ -154,7 +154,11 @@ export default defineComponent({
         .then(res => {
           message.success('验证码已发送，请注意查收', 5)
           startCounter()
-          console.log(res)
+          if (process.env.NODE_ENV === 'development') {
+            setTimeout(() => {
+              message.success(`验证码为${res.data.data.veriCode}`, 3)
+            }, 3000)
+          }
         })
         .catch(e => {
           console.log(e)

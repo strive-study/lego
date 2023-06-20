@@ -102,7 +102,7 @@
 
 <script lang="ts">
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { GlobalDataProps } from '@/store'
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
 import LText from '@/components/LText.vue'
@@ -120,6 +120,7 @@ import UserProfile from '@/components/UserProfile.vue'
 import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 import initContextMenu from '@/plugins/contextMenu'
+import { Modal } from 'ant-design-vue'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -161,6 +162,7 @@ export default defineComponent({
     })
     onUnmounted(() => {
       clearInterval(timer)
+      window.onbeforeunload = null
     })
     const currentElement = computed<ComponentData | null>(
       () => store.getters.getCurrentElement
@@ -214,6 +216,31 @@ export default defineComponent({
       })
     }
 
+    onBeforeRouteLeave((to, from, next) => {
+      if (isDirty.value) {
+        Modal.confirm({
+          title: '作品还未保存，是否保存？',
+          okText: '保存',
+          okType: 'primary',
+          cancelText: '不保存',
+          onOk: async () => {
+            await saveWork()
+            next()
+          },
+          onCancel: () => {
+            next()
+          }
+        })
+      } else {
+        next()
+      }
+    })
+
+    window.onbeforeunload = e => {
+      if (isDirty.value) {
+        return ''
+      }
+    }
     return {
       components,
       defaultTextTemplates,

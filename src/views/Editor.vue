@@ -22,7 +22,7 @@
             >
           </a-menu-item>
           <a-menu-item key="3">
-            <a-button type="primary">发布</a-button>
+            <a-button type="primary" @click="publish">发布</a-button>
           </a-menu-item>
           <a-menu-item key="4">
             <user-profile :user="userInfo"></user-profile>
@@ -38,13 +38,18 @@
           :list="defaultTextTemplates"
           @on-item-click="handleAddItem"
         ></components-list>
+        <img src="" id="test" :style="{ width: '300px' }" alt="" />
       </a-layout-sider>
       <!-- 画布区域 -->
       <a-layout style="padding: 0 24px 24px">
         <a-layout-content class="preview-container">
           <p>画布区域</p>
           <history-area></history-area>
-          <div class="preview-list" id="canvas-area">
+          <div
+            class="preview-list"
+            id="canvas-area"
+            :class="{ 'canvas-fix': canvasFix }"
+          >
             <div class="body-container" :style="page.props">
               <edit-wrapper
                 v-for="c in components"
@@ -104,7 +109,15 @@
 import { useStore } from 'vuex'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { GlobalDataProps } from '@/store'
-import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
+import html2canvas from 'html2canvas'
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref
+} from 'vue'
 import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
@@ -149,6 +162,7 @@ export default defineComponent({
     const userInfo = computed(() => store.state.user)
     const isSaveLoading = computed(() => store.getters.isOpLoading('saveWork'))
     const isDirty = computed(() => store.state.editor.isDirty)
+    const canvasFix = ref(false)
     let timer: any
     onMounted(() => {
       if (currentWorkId) {
@@ -241,6 +255,18 @@ export default defineComponent({
         return ''
       }
     }
+
+    const publish = async () => {
+      // 置空选中
+      store.commit('setActive', '')
+      const el = document.getElementById('canvas-area') as HTMLElement
+      canvasFix.value = true
+      await nextTick()
+      html2canvas(el, { width: 375, useCORS: true, scale: 1 }).then(canvas => {
+        const image = document.getElementById('test') as HTMLImageElement
+        image.src = canvas.toDataURL()
+      })
+    }
     return {
       components,
       defaultTextTemplates,
@@ -249,13 +275,15 @@ export default defineComponent({
       page,
       userInfo,
       isSaveLoading,
+      canvasFix,
       handleAddItem,
       handleSetActive,
       handleChange,
       pageChange,
       updatePosition,
       titleChange,
-      saveWork
+      saveWork,
+      publish
     }
   }
 })
@@ -302,6 +330,15 @@ export default defineComponent({
       position: fixed;
       margin-top: 50px;
       max-height: 80vh;
+      /* 截图无法完全，在截图时短暂去掉max-height */
+      &.canvas-fix {
+        position: absolute;
+        max-height: none;
+      }
+      /* 截取去阴影，黑块问题 */
+      &.canvas-fix .edit-wrapper > * {
+        box-shadow: none !important;
+      }
     }
   }
 }

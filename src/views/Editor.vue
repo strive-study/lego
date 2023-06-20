@@ -134,6 +134,7 @@ import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 import initContextMenu from '@/plugins/contextMenu'
 import { Modal } from 'ant-design-vue'
+import { screenshotAndUpload } from '@/helper'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -262,10 +263,15 @@ export default defineComponent({
       const el = document.getElementById('canvas-area') as HTMLElement
       canvasFix.value = true
       await nextTick()
-      html2canvas(el, { width: 375, useCORS: true, scale: 1 }).then(canvas => {
-        const image = document.getElementById('test') as HTMLImageElement
-        image.src = canvas.toDataURL()
-      })
+      const res = await screenshotAndUpload(el)
+      if (res) {
+        console.log('resss', res.data.urls)
+      }
+      canvasFix.value = false
+      // html2canvas(el, { width: 375, useCORS: true, scale: 1 }).then(canvas => {
+      //   const image = document.getElementById('test') as HTMLImageElement
+      //   image.src = canvas.toDataURL()
+      // })
     }
     return {
       components,

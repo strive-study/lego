@@ -12,6 +12,7 @@ export type _AxiosRequestConfig = AxiosRequestConfig & {
   opName?: string
 }
 const baseURL = 'http://localhost:7001'
+export const baseH5URL = 'http://localhost:7001/api/pages'
 axios.defaults.baseURL = `${baseURL}/api`
 axios.interceptors.request.use(config => {
   const newConfig = config as _AxiosRequestConfig

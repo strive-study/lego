@@ -2,6 +2,7 @@ import { message } from 'ant-design-vue'
 import html2canvas from 'html2canvas'
 import axios from 'axios'
 import { UploadRes } from './extraType'
+import qrCode from 'qrcode'
 interface CheckCondition {
   format?: string[]
   // 使用多少 M 为单位
@@ -105,4 +106,9 @@ export async function screenshotAndUpload(el: HTMLElement) {
     const data = uploadFile<UploadRes>(canvasBlob)
     return data
   }
+}
+
+export function generateQrCode(id: string, url: string) {
+  const el = document.getElementById(id) as HTMLCanvasElement
+  return qrCode.toCanvas(el, url, { width: 100 })
 }

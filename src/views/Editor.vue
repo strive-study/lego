@@ -171,7 +171,7 @@ export default defineComponent({
     const currentWorkId = route.params.id
     const canvasFix = ref(false)
     const isPublishing = ref(false)
-    const showPublishForm = ref(true)
+    const showPublishForm = ref(false)
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
     const userInfo = computed(() => store.state.user)
@@ -314,6 +314,7 @@ export default defineComponent({
         isPublishing.value = false
         canvasFix.value = false
       }
+      showPublishForm.value = true
     }
     return {
       components,

@@ -61,10 +61,10 @@ export interface PageProps {
 export interface PageData {
   props: PageProps
   title: string
-  // ----
   id?: string
   desc?: string
   coverImg?: string
+  uuid?: string
 }
 export type AllFormProps = PageProps & AllComponentProps
 export const editorTestComponents: ComponentData[] = [
@@ -435,7 +435,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.channels = data.list
     },
     createChannel(state, { data }: ResData<ChannelProps>) {
-      state.channels.push(data)
+      state.channels = [...state.channels, data]
     },
     deleteChannel(state, { payload }: ResData & ActionPayload) {
       const { urlParams } = payload

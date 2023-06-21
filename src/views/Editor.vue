@@ -1,5 +1,13 @@
 <template>
   <div class="container">
+    <a-modal
+      title="发布成功"
+      v-model:visible="showPublishForm"
+      width="700px"
+      :footer="null"
+    >
+      <publish-form />
+    </a-modal>
     <a-layout>
       <a-layout-header class="header">
         <div class="page-title">
@@ -111,7 +119,6 @@
 import { useStore } from 'vuex'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { GlobalDataProps } from '@/store'
-import html2canvas from 'html2canvas'
 import {
   computed,
   defineComponent,
@@ -132,6 +139,7 @@ import PropsTable from '@/components/PropsTable.vue'
 import HistoryArea from './editor/HistoryArea.vue'
 import InlineEdit from '@/components/InlineEdit.vue'
 import UserProfile from '@/components/UserProfile.vue'
+import PublishForm from './editor/PublishForm.vue'
 import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 import initContextMenu from '@/plugins/contextMenu'
@@ -152,7 +160,8 @@ export default defineComponent({
     'props-table': PropsTable,
     'history-area': HistoryArea,
     'inline-edit': InlineEdit,
-    'user-profile': UserProfile
+    'user-profile': UserProfile,
+    'publish-form': PublishForm
   },
   setup() {
     initContextMenu()
@@ -162,6 +171,7 @@ export default defineComponent({
     const currentWorkId = route.params.id
     const canvasFix = ref(false)
     const isPublishing = ref(false)
+    const showPublishForm = ref(true)
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
     const userInfo = computed(() => store.state.user)
@@ -315,6 +325,7 @@ export default defineComponent({
       isSaveLoading,
       canvasFix,
       isPublishing,
+      showPublishForm,
       handleAddItem,
       handleSetActive,
       handleChange,

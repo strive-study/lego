@@ -27,7 +27,7 @@ export function actionWrapper(
       newURL = toPath(urlParams)
     }
     const res = await axios(newURL, newConfig)
-    context.commit(commitName, res.data)
+    context.commit(commitName, { payload, ...res.data })
     return res.data
   }
 }

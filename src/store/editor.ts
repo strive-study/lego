@@ -1,4 +1,4 @@
-import { Module, Mutation } from 'vuex'
+import { ActionPayload, Module, Mutation } from 'vuex'
 import store, { GlobalDataProps, actionWrapper } from '.'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -17,6 +17,7 @@ import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
 import { ResData, ResListData, ResWorkData } from './resType'
+import { channel } from 'diagnostics_channel'
 
 export interface HistoryProps {
   id: string
@@ -224,6 +225,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     fetchChannel: actionWrapper('/channels/:id', 'fetchChannel'),
     createChannel: actionWrapper('/channels', 'createChannel', {
       method: 'post'
+    }),
+    deleteChannel: actionWrapper('/channels/:id', 'deleteChannel', {
+      method: 'delete'
     })
   },
   mutations: {
@@ -432,6 +436,12 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     },
     createChannel(state, { data }: ResData<ChannelProps>) {
       state.channels.push(data)
+    },
+    deleteChannel(state, { payload }: ResData & ActionPayload) {
+      const { urlParams } = payload
+      state.channels = state.channels.filter(
+        channel => channel.id !== urlParams.id
+      )
     }
   },
   getters: {

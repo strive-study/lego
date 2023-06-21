@@ -95,7 +95,11 @@ export async function uploadFile<R = any>(
 }
 
 export async function screenshotAndUpload(el: HTMLElement) {
-  const canvas = await html2canvas(el, { width: 375, useCORS: true, scale: 1 })
+  const canvas = await html2canvas(el, {
+    width: 375,
+    useCORS: true,
+    scale: 1
+  })
   const canvasBlob = await getCanvasBlob(canvas)
   if (canvasBlob) {
     const data = uploadFile<UploadRes>(canvasBlob)

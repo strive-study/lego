@@ -37,11 +37,16 @@
                   <a-col :span="18">
                     <a-input
                       :value="generateChannelURL(channel.id)"
+                      :id="`channel-url-${channel.id}`"
                       :readonly="true"
                     />
                   </a-col>
                   <a-col :span="6">
-                    <a-button class="copy-button">复制</a-button>
+                    <a-button
+                      class="copy-button"
+                      :data-clipboard-target="`#channel-url-${channel.id}`"
+                      >复制</a-button
+                    >
                   </a-col>
                 </a-row>
               </a-col>
@@ -90,6 +95,8 @@ import { GlobalDataProps } from '../../store/index'
 import { baseH5URL } from '@/main'
 import { generateQrCode } from '../../helper'
 import { last } from 'lodash-es'
+import Clipboard from 'clipboard'
+import { message } from 'ant-design-vue'
 
 const emits = defineEmits(['panel-close', 'publish-success'])
 const store = useStore<GlobalDataProps>()
@@ -119,6 +126,11 @@ watch(
   { flush: 'post' }
 )
 onMounted(() => {
+  const clipboard = new Clipboard('.copy-button')
+  clipboard.on('success', e => {
+    message.success('复制成功', 2)
+    e.clearSelection()
+  })
   channels.value.forEach(async channel => {
     try {
       await generateQrCode(

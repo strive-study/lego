@@ -117,16 +117,9 @@
 
 <script lang="ts">
 import { useStore } from 'vuex'
-import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { GlobalDataProps } from '@/store'
-import {
-  computed,
-  defineComponent,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref
-} from 'vue'
+import { computed, defineComponent, nextTick, onMounted, ref } from 'vue'
 import LText from '@/components/LText.vue'
 import ComponentsList from '@/components/ComponentsList.vue'
 import EditWrapper from '@/components/EditWrapper.vue'
@@ -143,8 +136,8 @@ import PublishForm from './editor/PublishForm.vue'
 import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 import initContextMenu from '@/plugins/contextMenu'
-import { Modal } from 'ant-design-vue'
-import { screenshotAndUpload } from '@/helper'
+import useSaveWork from '../hooks/useSaveWork'
+import usePublishWork from '../hooks/usePublishWork'
 // @ts-ignore
 // import PropsTable from '@/components/PropsTable.tsx'
 export type TabType = 'component' | 'layer' | 'page'
@@ -170,28 +163,16 @@ export default defineComponent({
     const store = useStore<GlobalDataProps>()
     const currentWorkId = route.params.id
     const canvasFix = ref(false)
-    const isPublishing = ref(false)
     const showPublishForm = ref(false)
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
     const userInfo = computed(() => store.state.user)
-    const isSaveLoading = computed(() => store.getters.isOpLoading('saveWork'))
-    const isDirty = computed(() => store.state.editor.isDirty)
-    const channels = computed(() => store.state.editor.channels)
-    let timer: any
+    const { saveWork, isSaveLoading } = useSaveWork()
+    const { publishWork, isPublishing } = usePublishWork()
     onMounted(() => {
       if (currentWorkId) {
         store.dispatch('fetchWork', { urlParams: { id: currentWorkId } })
       }
-      timer = setInterval(() => {
-        if (isDirty.value) {
-          saveWork()
-        }
-      }, 1000 * 60 * 3)
-    })
-    onUnmounted(() => {
-      clearInterval(timer)
-      window.onbeforeunload = null
     })
     const currentElement = computed<ComponentData | null>(
       () => store.getters.getCurrentElement
@@ -230,48 +211,6 @@ export default defineComponent({
       store.commit('updatePage', { key: 'title', value: title, isRoot: true })
     }
 
-    const saveWork = () => {
-      const { title, props, coverImg } = page.value
-      const payload = {
-        title,
-        coverImg,
-        content: {
-          components: components.value,
-          props
-        }
-      }
-      store.dispatch('saveWork', {
-        data: payload,
-        urlParams: { id: currentWorkId }
-      })
-    }
-
-    onBeforeRouteLeave((to, from, next) => {
-      if (isDirty.value) {
-        Modal.confirm({
-          title: '作品还未保存，是否保存？',
-          okText: '保存',
-          okType: 'primary',
-          cancelText: '不保存',
-          onOk: async () => {
-            await saveWork()
-            next()
-          },
-          onCancel: () => {
-            next()
-          }
-        })
-      } else {
-        next()
-      }
-    })
-
-    window.onbeforeunload = e => {
-      if (isDirty.value) {
-        return ''
-      }
-    }
-
     const publish = async () => {
       isPublishing.value = true
       // 置空选中
@@ -280,41 +219,13 @@ export default defineComponent({
       canvasFix.value = true
       await nextTick()
       try {
-        // 截图上传后端
-        const res = await screenshotAndUpload(el)
-        if (res) {
-          // 更新coverImage
-          store.commit('updatePage', {
-            key: 'coverImg',
-            value: res.data.urls[0],
-            isRoot: true
-          })
-          // 保存作品
-          await saveWork()
-          // 发布
-          await store.dispatch('publishWork', {
-            urlParams: { id: currentWorkId }
-          })
-          // 判断是否有渠道,如果没有渠道,创建一个默认渠道
-          await store.dispatch('fetchChannel', {
-            urlParams: { id: currentWorkId }
-          })
-          if (channels.value.length === 0) {
-            await store.dispatch('createChannel', {
-              data: {
-                name: '默认',
-                workId: parseInt(currentWorkId as string)
-              }
-            })
-          }
-        }
+        await publishWork(el)
+        showPublishForm.value = true
       } catch (error) {
         console.error(error)
       } finally {
-        isPublishing.value = false
         canvasFix.value = false
       }
-      showPublishForm.value = true
     }
     return {
       components,

@@ -46,7 +46,12 @@
         </a-form-item>
       </a-form>
       <div class="btn-group">
-        <a-button type="primary" @click="validateAndSave">保存</a-button>
+        <a-button
+          type="primary"
+          @click="validateAndSave"
+          :loading="isSaveLoading"
+          >保存</a-button
+        >
         <a-button @click="handleClose">取消</a-button>
       </div>
     </a-drawer>
@@ -95,7 +100,7 @@ const rules = reactive({
   title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
   desc: [{ required: true, message: '描述不能为空', trigger: 'blur' }]
 })
-const { saveWork } = useSaveWork()
+const { saveWork, isSaveLoading } = useSaveWork(true)
 const { validate, validateInfos } = useForm(form, rules)
 onMounted(() => {
   generateQrCode('qrcode', previewURL.value)

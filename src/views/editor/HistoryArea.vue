@@ -22,11 +22,6 @@
         </a-button>
       </a-tooltip>
     </div>
-    <li v-for="(item, index) in histories" :key="item.id">
-      <span :class="{ bold: index === historyIndex }"
-        >{{ item.type }} - {{ item.data.key }}</span
-      >
-    </li>
   </div>
 </template>
 

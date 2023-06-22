@@ -15,13 +15,14 @@ const useSaveWork = (disableSideEffects = false) => {
   let timer: any
 
   const saveWork = () => {
-    const { title, props, coverImg } = page.value
+    const { title, props, coverImg, setting } = page.value
     const payload = {
       title,
       coverImg,
       content: {
         components: components.value,
-        props
+        props,
+        setting
       }
     }
     store.dispatch('saveWork', {

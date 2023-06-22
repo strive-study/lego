@@ -99,6 +99,13 @@
                 </a-empty>
               </div>
             </div>
+            <div v-else>
+              <a-empty>
+                <template #description>
+                  <p>请选择一个编辑元素</p>
+                </template>
+              </a-empty>
+            </div>
           </a-tab-pane>
           <a-tab-pane key="layer" tab="图层设置">
             <layer-list
@@ -237,6 +244,7 @@ export default defineComponent({
 
     const preview = async () => {
       await saveWork()
+      await nextTick()
       showPreviewForm.value = true
     }
     return {

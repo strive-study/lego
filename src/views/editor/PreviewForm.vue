@@ -22,15 +22,49 @@
       :closable="true"
       :visible="visible"
       @close="handleClose"
-    ></a-drawer>
+    >
+      <a-form :model="form" :rules="rules" class="form" ref="formRef">
+        <a-form-item label="扫码预览：">
+          <canvas class="qrcode-container" id="qrcode"></canvas>
+        </a-form-item>
+        <a-form-item label="上传封面：">
+          <styled-uploader
+            @success="onSuccess"
+            showUploaded
+            :uploaded="form.uploaded"
+          ></styled-uploader>
+        </a-form-item>
+        <a-form-item
+          class="required"
+          label="标题:"
+          v-bind="validateInfos.title"
+        >
+          <a-input v-model:value="form.title" style="width: 200px"></a-input>
+        </a-form-item>
+        <a-form-item class="required" label="描述:" v-bind="validateInfos.desc">
+          <a-input v-model:value="form.desc" style="width: 200px"></a-input>
+        </a-form-item>
+      </a-form>
+      <div class="btn-group">
+        <a-button type="primary" @click="validateAndSave">保存</a-button>
+        <a-button @click="handleClose">取消</a-button>
+      </div>
+    </a-drawer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { baseH5URL } from '@/main'
 import { GlobalDataProps } from '@/store'
-import { computed } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useStore } from 'vuex'
+import StyledUploader from '@/components/StyledUploader.vue'
+import { generateQrCode } from '@/helper'
+import { UploadRes } from '@/extraType'
+import useSaveWork from '@/hooks/useSaveWork'
+import { useForm } from 'ant-design-vue/lib/form'
+import { message } from 'ant-design-vue'
+import { forEach } from 'lodash-es'
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -43,8 +77,55 @@ const pageState = computed(() => store.state.editor.page)
 const previewURL = computed(
   () => `${baseH5URL}/preview/${pageState.value.id}-${pageState.value.uuid}`
 )
+const { title, desc, setting } = pageState.value
+const formRef = ref<HTMLElement | null>(null)
+const form = reactive({
+  title: title || '',
+  desc: desc || '',
+  uploaded: {
+    data: {
+      url:
+        (setting && setting.shareImg) ||
+        'http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f79389d4737571e2e1dc7cb.png'
+    }
+  }
+})
+const rules = reactive({
+  title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
+  desc: [{ required: true, message: '描述不能为空', trigger: 'blur' }]
+})
+const { saveWork } = useSaveWork()
+const { validate, validateInfos } = useForm(form, rules)
+onMounted(() => {
+  generateQrCode('qrcode', previewURL.value)
+})
 const handleClose = () => {
   emits('update:visible', false)
+}
+
+const validateAndSave = () => {
+  validate().then(async () => {
+    forEach(form, (value, key) => {
+      if (key === 'uploaded' && typeof value !== 'string') {
+        store.commit('updatePage', {
+          key: 'shareImg',
+          value: value.data.url,
+          isSetting: true
+        })
+      } else {
+        store.commit('updatePage', { key, value, isRoot: true })
+      }
+    })
+    await saveWork()
+    emits('update:visible', false)
+    message.success('保存成功', 2)
+  })
+}
+const onSuccess = (res: UploadRes) => {
+  const url = res.data.urls[0]
+  form.uploaded = {
+    data: { url }
+  }
 }
 </script>
 
@@ -79,6 +160,26 @@ const handleClose = () => {
       overflow-x: hidden;
       overflow-y: auto;
     }
+  }
+}
+.form {
+  .required ::v-deep .ant-form-item-label {
+    height: 32px;
+  }
+  ::v-deep .ant-form-item-label {
+    display: flex;
+    align-items: center;
+  }
+  .form-cover-img {
+    width: 150px;
+    height: 150px;
+  }
+}
+.btn-group {
+  text-align: left;
+  padding-left: 40px;
+  button {
+    margin: 0 10px;
   }
 }
 </style>

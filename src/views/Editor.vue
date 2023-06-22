@@ -8,6 +8,10 @@
     >
       <publish-form />
     </a-modal>
+    <preview-form
+      v-model:visible="showPreviewForm"
+      v-if="showPreviewForm"
+    ></preview-form>
     <a-layout>
       <a-layout-header class="header">
         <div class="page-title">
@@ -22,7 +26,7 @@
         </div>
         <a-menu :selectable="false" theme="dark" mode="horizontal">
           <a-menu-item key="1">
-            <a-button type="primary">预览和设置</a-button>
+            <a-button type="primary" @click="preview">预览和设置</a-button>
           </a-menu-item>
           <a-menu-item key="2">
             <a-button type="primary" @click="saveWork" :loading="isSaveLoading"
@@ -133,6 +137,7 @@ import HistoryArea from './editor/HistoryArea.vue'
 import InlineEdit from '@/components/InlineEdit.vue'
 import UserProfile from '@/components/UserProfile.vue'
 import PublishForm from './editor/PublishForm.vue'
+import PreviewForm from './editor/PreviewForm.vue'
 import { pickBy } from 'lodash-es'
 import initHotKeys from '@/plugins/hotKeys'
 import initContextMenu from '@/plugins/contextMenu'
@@ -154,7 +159,8 @@ export default defineComponent({
     'history-area': HistoryArea,
     'inline-edit': InlineEdit,
     'user-profile': UserProfile,
-    'publish-form': PublishForm
+    'publish-form': PublishForm,
+    'preview-form': PreviewForm
   },
   setup() {
     initContextMenu()
@@ -164,6 +170,7 @@ export default defineComponent({
     const currentWorkId = route.params.id
     const canvasFix = ref(false)
     const showPublishForm = ref(false)
+    const showPreviewForm = ref(false)
     const components = computed(() => store.state.editor.components)
     const page = computed(() => store.state.editor.page)
     const userInfo = computed(() => store.state.user)
@@ -227,6 +234,11 @@ export default defineComponent({
         canvasFix.value = false
       }
     }
+
+    const preview = async () => {
+      await saveWork()
+      showPreviewForm.value = true
+    }
     return {
       components,
       defaultTextTemplates,
@@ -238,6 +250,7 @@ export default defineComponent({
       canvasFix,
       isPublishing,
       showPublishForm,
+      showPreviewForm,
       handleAddItem,
       handleSetActive,
       handleChange,
@@ -245,7 +258,8 @@ export default defineComponent({
       updatePosition,
       titleChange,
       saveWork,
-      publish
+      publish,
+      preview
     }
   }
 })

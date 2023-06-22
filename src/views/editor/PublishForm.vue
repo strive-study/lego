@@ -157,7 +157,7 @@ const createChannel = async () => {
   }
 }
 const generateChannelURL = (id: number) =>
-  `${baseH5URL}/p/${page.value.id}-${page.value.uuid}?channel=${id}`
+  `${baseH5URL}/${page.value.id}-${page.value.uuid}?channel=${id}`
 
 const deleteDisabled = computed(() => channels.value.length === 1)
 const deleteChannel = (id: number) => {

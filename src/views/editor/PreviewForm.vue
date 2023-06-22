@@ -78,6 +78,7 @@ const previewURL = computed(
   () => `${baseH5URL}/preview/${pageState.value.id}-${pageState.value.uuid}`
 )
 const { title, desc, setting } = pageState.value
+console.log('setting', setting)
 const formRef = ref<HTMLElement | null>(null)
 const form = reactive({
   title: title || '',

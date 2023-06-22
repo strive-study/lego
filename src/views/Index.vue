@@ -18,7 +18,6 @@ import { GlobalDataProps } from '@/store'
 import { computed } from 'vue'
 const store = useStore<GlobalDataProps>()
 const user = computed(() => store.state.user)
-console.log('user', user.value)
 </script>
 
 <style>

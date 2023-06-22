@@ -1,6 +1,5 @@
 import { Module } from 'vuex'
-import { GlobalDataProps } from '.'
-import axios from 'axios'
+import { GlobalDataProps, actionWrapper } from '.'
 import { ResListData } from './resType'
 export interface TemplateProps {
   id: number
@@ -63,22 +62,22 @@ export const templateTestData: TemplateProps[] = [
 
 export interface TemplatesProps {
   data: TemplateProps[]
+  totalTemplates: number
 }
 
 const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
-    data: []
+    data: [],
+    totalTemplates: 0
   },
   actions: {
-    fetchTemplates({ commit }) {
-      return axios.get('/templates').then(res => {
-        commit('fetchTemplates', res.data)
-      })
-    }
+    fetchTemplates: actionWrapper('/templates', 'fetchTemplates')
   },
   mutations: {
-    fetchTemplates(state, rawData: ResListData<TemplateProps>) {
-      state.data = rawData.data.list
+    fetchTemplates(state, { data }: ResListData<TemplateProps>) {
+      console.log(data)
+      state.data = data.list
+      state.totalTemplates = data.count
     }
   },
   getters: {

@@ -112,3 +112,9 @@ export function generateQrCode(id: string, url: string) {
   const el = document.getElementById(id) as HTMLCanvasElement
   return qrCode.toCanvas(el, url, { width: 100 })
 }
+
+export const objToQueryStirng = (queryObj: { [key: string]: any }) => {
+  return Object.keys(queryObj)
+    .map(key => `${key}=${queryObj[key]}`)
+    .join('&')
+}

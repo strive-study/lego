@@ -13,7 +13,9 @@ import { GlobalDataProps } from '@/store'
 const store = useStore<GlobalDataProps>()
 const templateTestData = computed(() => store.state.templates.data)
 onMounted(() => {
-  store.dispatch('fetchTemplates')
+  store.dispatch('fetchTemplates', {
+    searchParams: { pageSize: 8, pageIndex: 0 }
+  })
 })
 </script>
 

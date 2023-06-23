@@ -17,7 +17,6 @@ import { message } from 'ant-design-vue'
 import { cloneDeep, isArray } from 'lodash-es'
 import { insertAt } from '@/helper'
 import { ResData, ResListData, ResWorkData } from './resType'
-import { channel } from 'diagnostics_channel'
 
 export interface HistoryProps {
   id: string
@@ -61,11 +60,22 @@ export interface PageProps {
 export interface PageData {
   props: PageProps
   title: string
-  id?: string
+  id?: number
   desc?: string
   coverImg?: string
   uuid?: string
   setting?: { [key: string]: any }
+  isTemplate?: boolean
+  isHot?: boolean
+  author?: string
+  copiedCount?: number
+  status?: string
+  user?: {
+    gender: string
+    nickName: string
+    picture: string
+    userName: string
+  }
 }
 export type AllFormProps = PageProps & AllComponentProps
 export const editorTestComponents: ComponentData[] = [
@@ -351,7 +361,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     ),
     updatePage: setDirtyWrapper((state, { key, value, isRoot, isSetting }) => {
       if (isRoot) {
-        state.page[key as keyof PageData] = value
+        // ts bug issues/31663
+        // state.page[key as keyof PageData] = value
+        ;(state.page as any)[key] = value
       } else if (isSetting) {
         state.page.setting = {
           ...state.page.setting,

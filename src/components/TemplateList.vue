@@ -24,6 +24,9 @@
             </template>
           </a-card-meta>
         </a-card>
+        <div class="tag-list">
+          <a-tag color="red" v-if="item.isHot">Hot</a-tag>
+        </div>
       </a-col>
     </a-row>
   </div>
@@ -45,6 +48,11 @@ const props = defineProps<Props>()
 }
 .poster-item .ant-card {
   border-radius: 12px;
+}
+.tag-list {
+  position: absolute;
+  top: -4px;
+  left: 6px;
 }
 .poster-item .ant-card-cover {
   height: 390px;

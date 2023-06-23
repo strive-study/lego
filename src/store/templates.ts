@@ -1,15 +1,18 @@
 import { Module } from 'vuex'
 import { GlobalDataProps, actionWrapper } from '.'
 import { ResListData } from './resType'
-export interface TemplateProps {
-  id: number
-  title: string
-  coverImg: string
-  author: string
-  copiedCount: number
-}
+import { PageData } from './editor'
+// export interface TemplateProps {
+//   id: number
+//   title: string
+//   coverImg: string
+//   author: string
+//   copiedCount: number
+// }
 
-export const templateTestData: TemplateProps[] = [
+export type TemplateProps = Required<Omit<PageData, 'props' | 'setting'>>
+
+export const templateTestData: any[] = [
   {
     id: 1,
     coverImg:
@@ -76,8 +79,10 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
   mutations: {
     fetchTemplates(state, { data }: ResListData<TemplateProps>) {
       console.log(data)
-      state.data = data.list
-      state.totalTemplates = data.count
+      const { count, list } = data
+
+      state.data = [...state.data, ...list]
+      state.totalTemplates = count
     }
   },
   getters: {

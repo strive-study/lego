@@ -18,24 +18,29 @@ const useLoadMore = (
   const requestParams = computed(() => {
     return {
       ...params,
-      pageIndex: pageIndex.value + 1
+      pageIndex: pageIndex.value
     }
   })
-
-  const loadMorePage = () => {
-    store
-      .dispatch(actionName, { searchParams: requestParams.value })
-      .then(() => {
-        pageIndex.value++
-      })
+  const loadPrePage = () => {
+    pageIndex.value--
+    store.dispatch(actionName, { searchParams: requestParams.value })
   }
+  const loadMorePage = () => {
+    pageIndex.value++
+    store.dispatch(actionName, { searchParams: requestParams.value })
+  }
+  const isFirstPage = computed(() => {
+    return pageIndex.value === 0
+  })
   const isLastPage = computed(() => {
     return Math.ceil(total.value / params.pageSize) === pageIndex.value + 1
   })
 
   return {
     loadMorePage,
+    loadPrePage,
     isLastPage,
+    isFirstPage,
     pageIndex
   }
 }

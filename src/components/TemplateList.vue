@@ -40,42 +40,71 @@ interface Props {
 }
 const props = defineProps<Props>()
 </script>
-
-<style>
+<!-- 开始 -->
+<style scoped lang="scss">
 .poster-item {
   position: relative;
   margin-bottom: 20px;
+
+  ::v-deep .ant-card {
+    border-radius: 12px;
+  }
+  .ant-card-hoverable {
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+  }
+  ::v-deep .ant-card-body {
+    padding: 0;
+  }
+  .ant-card-meta {
+    margin: 0;
+  }
+  ::v-deep .ant-card-meta-title {
+    color: #333;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f2f2f2;
+    margin-bottom: 0 !important;
+  }
+  ::v-deep .ant-card-cover {
+    height: 390px;
+    position: relative;
+    overflow: hidden;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    .hover-item {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      background: rgba(0, 0, 0, 0.8);
+      align-items: center;
+      justify-content: center;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    img {
+      width: 100%;
+      transition: all ease-in 0.2s;
+      /* height: 100%; */
+    }
+  }
+  &:hover {
+    img {
+      transform: scale(1.25);
+    }
+    .hover-item {
+      display: flex;
+    }
+  }
 }
-.poster-item .ant-card {
-  border-radius: 12px;
-}
+
 .tag-list {
   position: absolute;
   top: -4px;
   left: 6px;
 }
-.poster-item .ant-card-cover {
-  height: 390px;
-}
-.poster-item .ant-card-cover > img {
-  width: 100%;
-  /* height: 100%; */
-}
-.poster-item .ant-card-hoverable {
-  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
-}
-.poster-item .ant-card-body {
-  padding: 0;
-}
-.poster-item .ant-card-meta {
-  margin: 0;
-}
-.poster-item .ant-card-meta-title {
-  color: #333;
-  padding: 10px 12px;
-  border-bottom: 1px solid #f2f2f2;
-  margin-bottom: 0 !important;
-}
+
 .description-detail {
   display: flex;
   justify-content: space-between;
@@ -91,34 +120,7 @@ const props = defineProps<Props>()
 .poster-title h2 {
   margin-bottom: 0px;
 }
-.poster-item .ant-card-cover {
-  position: relative;
-  overflow: hidden;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-}
-.poster-item .ant-card-cover img {
-  transition: all ease-in 0.2s;
-}
-.poster-item .ant-card-cover .hover-item {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  background: rgba(0, 0, 0, 0.8);
-  align-items: center;
-  justify-content: center;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-}
-.poster-item:hover .hover-item {
-  display: flex;
-}
-.poster-item:hover img {
-  transform: scale(1.25);
-}
+
 .barcode-container img {
   border-radius: 0;
 }

@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Index from '@/views/Index.vue'
-import { useStore } from 'vuex'
 import axios from 'axios'
 import { message } from 'ant-design-vue'
 import store from '@/store'
@@ -25,6 +24,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '模板详情'
         }
+      },
+      {
+        path: 'works',
+        name: 'works',
+        component: () => import('@/views/Works.vue'),
+        meta: { title: '我的作品', requiredLogin: true }
       }
     ]
   },

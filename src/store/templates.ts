@@ -66,23 +66,31 @@ export const templateTestData: any[] = [
 export interface TemplatesProps {
   data: TemplateProps[]
   totalTemplates: number
+  works: TemplateProps[]
+  totalWorks: number
 }
 
 const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
     data: [],
-    totalTemplates: 0
+    totalTemplates: 0,
+    works: [],
+    totalWorks: 0
   },
   actions: {
-    fetchTemplates: actionWrapper('/templates', 'fetchTemplates')
+    fetchTemplates: actionWrapper('/templates', 'fetchTemplates'),
+    fetchWorks: actionWrapper('/works', 'fetchWorks')
   },
   mutations: {
     fetchTemplates(state, { data }: ResListData<TemplateProps>) {
-      console.log(data)
       const { count, list } = data
-
       state.data = [...state.data, ...list]
       state.totalTemplates = count
+    },
+    fetchWorks(state, rawData: ResListData<TemplateProps>) {
+      const { count, list } = rawData.data
+      state.works = list
+      state.totalWorks = count
     }
   },
   getters: {

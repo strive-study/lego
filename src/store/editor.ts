@@ -69,7 +69,7 @@ export interface PageData {
   isHot?: boolean
   author?: string
   copiedCount?: number
-  status?: string
+  status?: number
   user?: {
     gender: string
     nickName: string

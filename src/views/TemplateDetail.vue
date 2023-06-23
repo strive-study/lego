@@ -3,7 +3,9 @@
     <a-row type="flex" justify="center" class="content" v-if="template">
       <!-- 左侧海报 -->
       <a-col :span="8" class="left">
-        <img :src="template.coverImg" alt="" />
+        <a :href="template.coverImg">
+          <img :src="template.coverImg" id="logo-img" alt="" />
+        </a>
       </a-col>
       <!-- 右侧信息 -->
       <a-col :span="8">
@@ -26,7 +28,9 @@
               使用模版
             </a-button>
           </router-link>
-          <a-button size="large" shape="round">下载图片海报</a-button>
+          <a-button size="large" shape="round" @click="download"
+            >下载图片海报</a-button
+          >
         </div>
       </a-col>
     </a-row>
@@ -39,6 +43,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { GlobalDataProps } from '@/store'
 import { TemplateProps } from '@/store/templates'
+import { downloadFile } from '@/helper'
 const route = useRoute()
 const store = useStore<GlobalDataProps>()
 
@@ -46,6 +51,10 @@ const currentId = route.params.id as string
 const template = computed<TemplateProps>(() =>
   store.getters.getTemplateById(parseInt(currentId))
 )
+const download = () => {
+  const image = document.getElementById('logo-img') as HTMLImageElement
+  downloadFile(image.src, 'test.png')
+}
 </script>
 
 <style lang="scss" scoped>

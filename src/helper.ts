@@ -118,3 +118,31 @@ export const objToQueryStirng = (queryObj: { [key: string]: any }) => {
     .map(key => `${key}=${queryObj[key]}`)
     .join('&')
 }
+
+export const downloadFile = (src: string, fileName = 'default.png') => {
+  const link = document.createElement('a')
+  link.rel = 'noopener'
+  link.download = fileName
+  if (link.origin !== location.origin) {
+    axios
+      .get(src, { responseType: 'blob' })
+      .then(data => {
+        link.href = URL.createObjectURL(data.data)
+        setTimeout(() => {
+          link.dispatchEvent(new MouseEvent('click'))
+        })
+        setTimeout(() => {
+          URL.revokeObjectURL(link.href)
+        }, 10000)
+      })
+      .catch(e => {
+        console.error(e)
+        link.target = '_blank'
+        link.href = src
+        link.dispatchEvent(new MouseEvent('click'))
+      })
+  } else {
+    link.href = src
+    link.dispatchEvent(new MouseEvent('click'))
+  }
+}

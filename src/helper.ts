@@ -3,6 +3,8 @@ import html2canvas from 'html2canvas'
 import axios from 'axios'
 import { UploadRes } from './extraType'
 import qrCode from 'qrcode'
+import { saveAs } from 'file-saver'
+
 interface CheckCondition {
   format?: string[]
   // 使用多少 M 为单位
@@ -145,4 +147,9 @@ export const downloadFile = (src: string, fileName = 'default.png') => {
     link.href = src
     link.dispatchEvent(new MouseEvent('click'))
   }
+}
+
+export const downloadImage = (url: string) => {
+  const fileName = url.substring(url.lastIndexOf('/') + 1)
+  saveAs(url, fileName)
 }

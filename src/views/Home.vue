@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import { useStore } from 'vuex'
 import TemplateList from '@/components/TemplateList.vue'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { GlobalDataProps } from '@/store'
 import useLoadMore from '../hooks/useLoadMore'
 const store = useStore<GlobalDataProps>()
@@ -28,20 +28,21 @@ const { loadMorePage, isLastPage } = useLoadMore('fetchTemplates', total, {
   pageIndex: 0,
   pageSize: 2
 })
+const scrollerHandler = () => {
+  const totalHeight = document.body.scrollHeight
+  const scrollPoint = window.scrollY + window.innerHeight
+  if (scrollPoint >= totalHeight && !isLastPage.value) {
+    loadMorePage()
+  }
+}
 onMounted(() => {
   store.dispatch('fetchTemplates', {
     searchParams: { pageSize: 2, pageIndex: 0 }
   })
-  window.addEventListener('scroll', () => {
-    const totalHeight = document.body.scrollHeight
-    const scrollPoint = window.scrollY + window.innerHeight
-    if (scrollPoint >= totalHeight && !isLastPage.value) {
-      loadMorePage()
-    }
-  })
+  window.addEventListener('scroll', scrollerHandler)
 })
-onMounted(() => {
-  window.onscroll = null
+onUnmounted(() => {
+  window.removeEventListener('scroll', scrollerHandler)
 })
 </script>
 

@@ -64,8 +64,10 @@ export const templateTestData: any[] = [
 ]
 
 export interface TemplatesProps {
+  // 首页使用
   data: TemplateProps[]
   totalTemplates: number
+  // 我在作品页面使用
   works: TemplateProps[]
   totalWorks: number
 }
@@ -86,9 +88,11 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
       const { count, list } = data
       state.data = [...state.data, ...list]
       state.totalTemplates = count
+      console.log('count', count)
     },
     fetchWorks(state, rawData: ResListData<TemplateProps>) {
       const { count, list } = rawData.data
+      console.log('----', rawData.data)
       state.works = list
       state.totalWorks = count
     }

@@ -9,8 +9,8 @@
       <h2>我的作品和模版</h2>
     </a-row>
     <a-tabs @change="changeCategory">
-      <a-tab-pane key="0" tab="我的作品"> </a-tab-pane>
-      <a-tab-pane key="1" tab="我的模版"> </a-tab-pane>
+      <a-tab-pane :key="0" tab="我的作品"> </a-tab-pane>
+      <a-tab-pane :key="1" tab="我的模版"> </a-tab-pane>
     </a-tabs>
     <a-empty v-if="works.length === 0 && !isLoading">
       <template v-slot:description>
@@ -26,87 +26,76 @@
       :loading="isLoading"
     >
     </works-list>
-    <a-row type="flex" justify="space-between" align="middle">
-      <h2>{{ pageIndex }}</h2>
-      <a-button
-        type="primary"
-        size="large"
-        @click="loadPrePage"
-        v-if="!isFirstPage"
-        :loading="isLoading"
-        >上一页</a-button
-      >
-      <a-button
-        type="primary"
-        size="large"
-        @click="loadMorePage"
-        v-if="!isLastPage"
-        :loading="isLoading"
-        >下一页</a-button
-      >
+    <a-row type="flex" justify="center" align="middle">
+      <a-pagination
+        v-model:current="current"
+        v-model:pageSize="searchParams.pageSize"
+        :total="totalWorks"
+        @change="handleChange"
+        show-less-items
+      />
     </a-row>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, onMounted, ref, nextTick } from 'vue'
+<script lang="ts" setup>
+import { computed, onMounted, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { GlobalDataProps } from '../store/index'
 import WorksList from '../components/WorksList.vue'
 import useLoadMore from '../hooks/useLoadMore'
-export default defineComponent({
-  components: {
-    WorksList
-  },
-  setup() {
-    const store = useStore<GlobalDataProps>()
-    const router = useRouter()
-    const works = computed(() => store.state.templates.works)
-    const total = computed(() => store.state.templates.totalWorks)
-    const isLoading = computed(() => store.getters.isOpLoading('fetchWorks'))
-    const isTemplate = ref(0)
-    const searchParams = computed(() => ({
-      pageIndex: 0,
-      pageSize: 2,
-      isTemplate: isTemplate.value
-    }))
-    onMounted(() => {
-      store.dispatch('fetchWorks', { searchParams: searchParams.value })
-    })
-    const { isLastPage, isFirstPage, pageIndex, loadMorePage, loadPrePage } =
-      useLoadMore('fetchWorks', total, searchParams.value)
-    const onDelete = (id: number) => {
-      store.dispatch('deleteWork', id)
-    }
-    const onCopy = (id: number) => {
-      store.dispatch('copyWork', id).then(({ data }) => {
-        router.push(`/editor/${data.id}`)
-      })
-    }
-    const changeCategory = (key: any) => {
-      isTemplate.value = key
-      pageIndex.value = 0
-      nextTick(() => {
-        store.dispatch('fetchWorks', { searchParams: searchParams.value })
-      })
-    }
 
-    return {
-      works,
-      isLastPage,
-      isFirstPage,
-      loadPrePage,
-      pageIndex,
-      isLoading,
-      total,
-      onDelete,
-      onCopy,
-      changeCategory,
-      loadMorePage
-    }
-  }
+const store = useStore<GlobalDataProps>()
+const router = useRouter()
+const works = computed(() => store.state.templates.works)
+const totalWorks = computed(() => store.state.templates.totalWorks)
+const current = computed(() => {
+  return pageIndex.value + 1
 })
+const isLoading = computed(() => store.getters.isOpLoading('fetchWorks'))
+const isTemplate = ref(0)
+let lastPageIndex = 0
+const searchParams = computed(() => ({
+  pageIndex: 0,
+  pageSize: 4,
+  isTemplate: isTemplate.value
+}))
+onMounted(() => {
+  store.dispatch('fetchWorks', { searchParams: searchParams.value })
+})
+
+const { pageIndex, requestParams, loadMorePage, loadPrePage } = useLoadMore(
+  'fetchWorks',
+  totalWorks,
+  searchParams.value
+)
+
+const onDelete = (id: number) => {
+  store.dispatch('deleteWork', id)
+}
+const onCopy = (id: number) => {
+  store.dispatch('copyWork', id).then(({ data }) => {
+    router.push(`/editor/${data.id}`)
+  })
+}
+const handleChange = (index: number) => {
+  if (index > lastPageIndex) {
+    loadMorePage()
+  } else {
+    loadPrePage()
+  }
+  lastPageIndex = index
+}
+
+const changeCategory = (key: number) => {
+  isTemplate.value = key
+  pageIndex.value = 0
+  requestParams.isTemplate = key
+  nextTick(() => {
+    store.dispatch('fetchWorks', { searchParams: searchParams.value })
+  })
+}
 </script>
 
 <style>

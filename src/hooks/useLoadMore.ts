@@ -1,4 +1,4 @@
-import { ComputedRef, computed, ref } from 'vue'
+import { ComputedRef, computed, reactive, ref, toRef } from 'vue'
 import { useStore } from 'vuex'
 
 interface LoadParams {
@@ -12,36 +12,37 @@ const useLoadMore = (
   params: LoadParams = { pageIndex: 0, pageSize: 8 }
 ) => {
   const store = useStore()
-  // 变化的参数
-  const pageIndex = ref(params.pageIndex)
-  // 请求的参数
-  const requestParams = computed(() => {
-    return {
-      ...params,
-      pageIndex: pageIndex.value
-    }
-  })
+  const requestParams = reactive(params)
   const loadPrePage = () => {
-    pageIndex.value--
-    store.dispatch(actionName, { searchParams: requestParams.value })
+    requestParams.pageIndex--
+    store.dispatch(actionName, { searchParams: requestParams })
+  }
+  const toPage = (index: number) => {
+    requestParams.pageIndex = index
+    store.dispatch('fetchWorks', { searchParams: requestParams.value })
   }
   const loadMorePage = () => {
-    pageIndex.value++
-    store.dispatch(actionName, { searchParams: requestParams.value })
+    requestParams.pageIndex++
+    store.dispatch(actionName, { searchParams: requestParams })
   }
+  // 总页码数量
+  const totalPage = computed(() => Math.ceil(total.value / params.pageSize))
   const isFirstPage = computed(() => {
-    return pageIndex.value === 0
+    return requestParams.pageIndex === 0
   })
   const isLastPage = computed(() => {
-    return Math.ceil(total.value / params.pageSize) === pageIndex.value + 1
+    return totalPage.value === requestParams.pageIndex + 1
   })
-
+  const pageIndex = toRef(requestParams, 'pageIndex')
   return {
-    loadMorePage,
-    loadPrePage,
     isLastPage,
     isFirstPage,
-    pageIndex
+    pageIndex,
+    requestParams,
+    totalPage,
+    loadMorePage,
+    loadPrePage,
+    toPage
   }
 }
 

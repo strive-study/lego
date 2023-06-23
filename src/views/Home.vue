@@ -40,6 +40,9 @@ onMounted(() => {
     }
   })
 })
+onMounted(() => {
+  window.onscroll = null
+})
 </script>
 
 <style lang="scss" scoped>

@@ -11,8 +11,18 @@ import { ResData } from '@/store/resType'
 export type _AxiosRequestConfig = AxiosRequestConfig & {
   opName?: string
 }
-const baseURL = 'http://localhost:7001'
-export const baseH5URL = 'http://localhost:7001/api/pages'
+// const baseURL = 'http://localhost:7001'
+// export const baseH5URL = 'http://localhost:7001/api/pages'
+let baseURL = ''
+let baseH5URL = ''
+if (process.env.NODE_ENV === 'development' || process.env.VUE_APP_STAGING) {
+  baseURL = 'http://localhost:7001'
+  baseH5URL = 'http://localhost:7001/api/pages'
+} else {
+  baseURL = 'http://117.50.177.179:7001'
+  baseH5URL = 'http://117.50.177.179:7001/api/pages'
+}
+export { baseURL, baseH5URL }
 axios.defaults.baseURL = `${baseURL}/api`
 axios.interceptors.request.use(config => {
   const newConfig = config as _AxiosRequestConfig

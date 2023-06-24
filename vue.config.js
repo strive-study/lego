@@ -1,6 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
 const BundleAnalyzerPlugin =
   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const CompressionWebpackPlugin = require('compression-webpack-plugin')
 const webpack = require('webpack')
 const isStaging = !!process.env.VUE_APP_STAGING
 const isProduction = process.env.NODE_ENV === 'production'
@@ -42,25 +43,34 @@ module.exports = defineConfig({
         })
       )
     }
-    config.optimization.splitChunks = {
-      maxInitialRequests: 30,
-      minSize: 300 * 1024,
-      chunks: 'all',
-      cacheGroups: {
-        antVendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name(module) {
-            // const packageName = module.context.match(
-            //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
-            // )[1]
-            const packageName = module.context.match(
-              /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-            )[1]
-            return `npm/${packageName.replace('@', '')}`
-          }
-        }
-      }
+    if (isProduction) {
+      config.plugins.push(
+        new CompressionWebpackPlugin({
+          algorithm: 'gzip',
+          test: /\.js$|\.html$|\.json$|\.css/,
+          threshold: 10240 // 文件超过10k大小进行压缩
+        })
+      )
     }
+    // config.optimization.splitChunks = {
+    //   maxInitialRequests: 30,
+    //   minSize: 300 * 1024,
+    //   chunks: 'all',
+    //   cacheGroups: {
+    //     antVendor: {
+    //       test: /[\\/]node_modules[\\/]/,
+    //       name(module) {
+    //         // const packageName = module.context.match(
+    //         //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
+    //         // )[1]
+    //         const packageName = module.context.match(
+    //           /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+    //         )[1]
+    //         return `npm/${packageName.replace('@', '')}`
+    //       }
+    //     }
+    //   }
+    // }
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {

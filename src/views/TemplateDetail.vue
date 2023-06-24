@@ -3,8 +3,9 @@
     <a-row type="flex" justify="center" class="content" v-if="template">
       <!-- 左侧海报 -->
       <a-col :span="8" class="left">
+        <img src="@/assets/logo.png" id="logo-img" alt="" />
         <a :href="template.coverImg">
-          <img :src="template.coverImg" id="logo-img" alt="" />
+          <img :src="template.coverImg" alt="" />
         </a>
       </a-col>
       <!-- 右侧信息 -->

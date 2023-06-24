@@ -44,22 +44,28 @@ module.exports = defineConfig({
     }
     config.optimization.splitChunks = {
       maxInitialRequests: 30,
-      minSize: 0,
+      minSize: 300 * 1024,
       chunks: 'all',
       cacheGroups: {
         antVendor: {
-          name: 'ant-design-vue',
-          test: /[\\/]node_modules[\\/](ant-design-vue)[\\/]/
-        },
-        canvasVendor: {
-          name: 'html2canvas',
-          test: /[\\/]node_modules[\\/](html2canvas)[\\/]/
-        },
-        vendor: {
-          name: 'vendor',
-          test: /[\\/]node_modules[\\/](!html2canvas)(!ant-design-vue)[\\/]/
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // const packageName = module.context.match(
+            //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
+            // )[1]
+            const packageName = module.context.match(
+              /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+            )[1]
+            return `npm/${packageName.replace('@', '')}`
+          }
         }
       }
     }
+  },
+  chainWebpack: config => {
+    config.plugin('html').tap(args => {
+      args[0].title = 'Strive乐高'
+      return args
+    })
   }
 })

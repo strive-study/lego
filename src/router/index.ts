@@ -36,7 +36,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/editor/:id',
     name: 'editor',
-    component: () => import('@/views/Editor.vue'),
+    component: () =>
+      import(/* webpackChunkName: "editor" */ '@/views/Editor.vue'),
     meta: {
       requiredLogin: true,
       title: '编辑我的设计'
@@ -45,7 +46,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/views/Login.vue'),
+    component: () =>
+      import(/* webpackChunkName: "login" */ '@/views/Login.vue'),
     meta: {
       // disableLoading: true
       redirectAlreadyLogin: true,

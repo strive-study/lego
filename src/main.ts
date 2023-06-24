@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import Antd from 'ant-design-vue'
+import Antd from './configAntD'
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import router from './router'
 import store from './store'

@@ -44,7 +44,7 @@ import { useStore } from 'vuex'
 import { GlobalDataProps } from '@/store'
 import { TemplateProps } from '@/store/templates'
 import { downloadImage } from '@/helper'
-import { downloadFile } from '@/helper'
+// import { downloadFile } from '@/helper'
 const route = useRoute()
 const store = useStore<GlobalDataProps>()
 
@@ -53,9 +53,9 @@ const template = computed<TemplateProps>(() =>
   store.getters.getTemplateById(parseInt(currentId))
 )
 const download = () => {
-  const image = document.getElementById('logo-img') as HTMLImageElement
-  downloadFile(image.src, 'test.png')
-  // downloadImage(template.value.coverImg)
+  // const image = document.getElementById('logo-img') as HTMLImageElement
+  // downloadFile(image.src, 'test.png')
+  downloadImage(template.value.coverImg)
 }
 </script>
 

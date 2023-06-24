@@ -4,7 +4,7 @@ import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import router from './router'
 import store from './store'
 import App from './App.vue'
-import 'ant-design-vue/dist/antd.css'
+import 'ant-design-vue/dist/antd.less'
 import 'cropperjs/dist/cropper.css'
 import { ResData } from '@/store/resType'
 

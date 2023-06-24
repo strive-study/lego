@@ -292,6 +292,11 @@ export default defineComponent({
     ::v-deep .ant-menu-item:hover {
       background-color: transparent;
     }
+    /* a-menu 收缩隐藏解决 */
+    .ant-menu {
+      width: 800px;
+      justify-content: flex-end;
+    }
   }
 
   .preview-container {

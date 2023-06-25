@@ -52,25 +52,26 @@ module.exports = defineConfig({
         })
       )
     }
-    // config.optimization.splitChunks = {
-    //   maxInitialRequests: 30,
-    //   minSize: 300 * 1024,
-    //   chunks: 'all',
-    //   cacheGroups: {
-    //     antVendor: {
-    //       test: /[\\/]node_modules[\\/]/,
-    //       name(module) {
-    //         // const packageName = module.context.match(
-    //         //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
-    //         // )[1]
-    //         const packageName = module.context.match(
-    //           /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-    //         )[1]
-    //         return `npm/${packageName.replace('@', '')}`
-    //       }
-    //     }
-    //   }
-    // }
+    config.optimization.splitChunks = {
+      maxInitialRequests: 30,
+      minSize: 300 * 1024,
+      chunks: 'all',
+      cacheGroups: {
+        antVendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            console.log(module)
+            // const packageName = module.context.match(
+            //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
+            // )[1]
+            const packageName = module.context.match(
+              /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+            )[1]
+            return `npm/${packageName.replace('@', '')}`
+          }
+        }
+      }
+    }
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {

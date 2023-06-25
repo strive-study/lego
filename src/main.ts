@@ -36,7 +36,7 @@ axios.interceptors.response.use(
     const newConfig = config as _AxiosRequestConfig
     store.commit('finishLoading', { opName: newConfig.opName })
     const { errno, message } = data
-    if (errno !== 0) {
+    if (errno && errno !== 0) {
       store.commit('setError', { status: true, message })
       return Promise.reject(data)
     }

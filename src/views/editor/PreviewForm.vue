@@ -28,11 +28,7 @@
           <canvas class="qrcode-container" id="qrcode"></canvas>
         </a-form-item>
         <a-form-item label="上传封面：">
-          <styled-uploader
-            @success="onSuccess"
-            showUploaded
-            :uploaded="form.uploaded"
-          ></styled-uploader>
+          <styled-uploader @success="onSuccess" showUploaded></styled-uploader>
         </a-form-item>
         <a-form-item
           class="required"

@@ -59,16 +59,17 @@ module.exports = defineConfig({
       cacheGroups: {
         antVendor: {
           test: /[\\/]node_modules[\\/]/,
-          name(module) {
-            console.log(module)
-            // const packageName = module.context.match(
-            //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
-            // )[1]
-            const packageName = module.context.match(
-              /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-            )[1]
-            return `npm/${packageName.replace('@', '')}`
-          }
+          // name(module) {
+          //   console.log(module)
+          //   // const packageName = module.context.match(
+          //   //   /[\\/]node_modules[\\/](.*?)[\\/]|$/
+          //   // )[1]
+          //   const packageName = module.context.match(
+          //     /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+          //   )[1]
+          //   return `npm/${packageName.replace('@', '')}`
+          // }
+          filename: 'js/[name].js'
         }
       }
     }
